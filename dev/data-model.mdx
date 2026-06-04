@@ -28,6 +28,8 @@ String FK_PUBLISHER           = "publisher_id";  // FK → publishers._id
 String FK_BOOKSHELF           = "bookshelf_id";  // FK → bookshelves._id
 String FK_TOC_ENTRY           = "anthology";     // FK → toc_entries._id
 String FK_STYLE               = "style";         // FK → booklist_styles._id
+String FK_CALIBRE_LIBRARY     = "clb_lib_id";   // FK → calibre_libraries._id
+String FK_IDENTIFIER          = "ident_id";     // FK → identifiers._id
 String FK_TAG                 = "tag_id";        // FK → tags.tag
 
 // ── Book identity ──────────────────────────────────────────────────────────
@@ -210,7 +212,7 @@ Tag mappings (associations between a tag name and a field/value combination) are
 
 The schema is fully normalised. All many-to-many relationships use explicit join tables:
 
-```
+```text
 books (TBL_BOOKS)
 │
 ├─── book_author (TBL_BOOK_AUTHOR) ──── authors (TBL_AUTHORS)
@@ -254,7 +256,7 @@ This means a new external site can be added by inserting a row into `TBL_IDENTIF
 
 The self-referential author relationship is handled by a dedicated join table rather than a nullable column on `authors`:
 
-```
+```text
 authors ──┐
           ├─── pseudonym_author ─────── authors
           │         pseudonym  (FK → authors._id)

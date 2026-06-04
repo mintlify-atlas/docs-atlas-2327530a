@@ -1,7 +1,7 @@
 ---
 title: "Syncing Your Collection with a Calibre Content Server"
 sidebarTitle: "Calibre Sync"
-description: "Step-by-step guide to connecting NTMB to a Calibre Content Server, mapping libraries to bookshelves, running imports and exports, and working with custom fields."
+description: "How to connect NeverTooManyBooks to a Calibre Content Server, map libraries to bookshelves, run imports and exports, and configure custom fields."
 ---
 
 NeverTooManyBooks can talk directly to a **Calibre Content Server (CCS)** — the built-in HTTP server included with the free, open-source [Calibre](https://calibre-ebook.com/) desktop application. Once the connection is configured you can pull books from your Calibre libraries into NTMB, push books back from NTMB to Calibre, and keep metadata like reading progress in sync across both apps. This is not a cloud service: the sync happens over a direct HTTP connection between your Android device and the machine running Calibre, so your data never passes through a third-party server.
@@ -36,7 +36,7 @@ Before starting setup, make sure you have:
   <Step title="Enter the server URL">
     Tap **Website address** and type the full URL of your Content Server, for example:
 
-    ```
+    ```text
     http://192.168.1.10:8080
     ```
 
@@ -93,10 +93,12 @@ Calibre supports user-defined custom columns (prefixed with `#`). NeverTooManyBo
 | `#read` | Read status (boolean) |
 | `#read_start` | Date started reading |
 | `#read_end` | Date finished reading |
-| `#read_progress` | Reading progress (percentage or page) |
-| Custom text field | Notes, personal rating, etc. |
+| `#date_read` | Date finished reading (alternative name) |
+| `#read_progress` | Reading progress (percentage or page count) |
+| `#rating` | Star rating |
+| `#notes` | Personal notes |
 
-Custom fields of type **bool**, **datetime**, **text**, **comments**, and **composite** are supported. Numeric and rating fields may have limited mapping support depending on the Calibre column type.
+Custom fields of type **bool**, **datetime**, **text**, **comments**, **composite**, **enumeration**, **int**, and **rating** are all fully supported. The `#read_progress` field receives special handling: its value is parsed from a percentage string (e.g. `"42%"`), a page/total fraction (e.g. `"100 / 332"`), or a decimal fraction (e.g. `"0.42"`).
 
 <Warning>
   If you edit the **same book** in both NeverTooManyBooks and Calibre between syncs, the sync cannot automatically resolve the conflict. Whichever direction you sync last will overwrite the other app's changes for that book. To avoid data loss, adopt a clear workflow: edit metadata primarily in one app and treat the other as a read-only view, or sync frequently so divergence stays minimal.

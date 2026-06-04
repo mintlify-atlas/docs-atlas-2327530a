@@ -1,7 +1,7 @@
 ---
-title: "Search Engine API: Adding Custom Book Sources"
+title: "Search Engine API: Integrating Custom Book Sources"
 sidebarTitle: Search Engine API
-description: Learn how the SearchEngine interface works and how to wire up a new book data source — from implementing the right sub-interface to registering it in EngineId.
+description: Learn how the SearchEngine interface works and how to wire up a new book data source, from sub-interface selection to EngineId registration.
 ---
 
 NeverTooManyBooks fetches book metadata from a variety of online sources, each implemented as a `SearchEngine`. The system is designed so that adding a new source is straightforward: implement the right sub-interface, register the engine, and plug it into the site list. This page walks through the architecture and shows a complete skeleton implementation so you can get a new data source running with minimal friction.
@@ -191,7 +191,7 @@ public abstract class JsoupSearchEngineBase extends SearchEngineBase {
     ```
 
     <Note>
-    The `fetchCovers` parameter is a boolean array of length `DBKey.NR_OF_BOOK_COVERS` (currently 2). Index 0 is the front cover, index 1 is the back cover. Only download cover images for indexes where `fetchCovers[i]` is `true`.
+    The `fetchCovers` parameter is a boolean array of length `DBKey.NR_OF_BOOK_COVERS` (currently 4). Index 0 is the front cover; higher indexes are additional cover slots. Only download cover images for indexes where `fetchCovers[i]` is `true`.
     </Note>
   </Step>
 

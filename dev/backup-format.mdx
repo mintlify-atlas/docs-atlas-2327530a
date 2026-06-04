@@ -1,7 +1,7 @@
 ---
-title: "Backup Archive Format: Structure and Record Types"
+title: "Backup Archive Format: Layout, Encodings, and Record Types"
 sidebarTitle: Backup Format
-description: A developer reference for the .ntmb ZIP archive layout, RecordType entries, supported encodings, and the JSON book record schema used in NeverTooManyBooks backups.
+description: Developer reference for the .ntmb ZIP archive layout, RecordType entries, supported encodings, and the JSON book record schema used in NTMB backups.
 ---
 
 NeverTooManyBooks stores full backups in a ZIP-based archive format (`.ntmb`) that is designed to be self-describing and forward-compatible. The archive bundles book data, cover images, app preferences, and booklist styles into a structured set of named entries. Understanding this layout is essential if you want to build external tooling that can read, write, or inspect NTMB backup files, or if you want to extend the backup system itself. This page covers the archive structure, the `RecordType` enum, the available encoding formats, and the JSON schema used for book records.
@@ -10,7 +10,7 @@ NeverTooManyBooks stores full backups in a ZIP-based archive format (`.ntmb`) th
 
 The default backup file is a standard ZIP archive with the extension `.ntmb`. Every entry inside the archive is named after its `RecordType` (see below). The top-level layout looks like this:
 
-```
+```text
 my-backup.ntmb  (ZIP)
 ├── info              ← Archive metadata (version, dates, record counts)
 ├── books.json        ← Main book collection (JSON encoding)
@@ -40,7 +40,7 @@ The `info` entry carries a `version` integer. Readers check this version before 
 |---|---|---|
 | `MetaData` | `info` | Archive metadata — version, creation timestamp, record counts. Exactly one per archive. |
 | `Books` | `books` | The main book collection. Includes embedded author, publisher, and series data. Exactly one per archive. |
-| `Covers` | _(per-file)_ | Individual cover image files. Multiple entries per archive. Named by book UUID and cover index. |
+| `Cover` | _(per-file)_ | Individual cover image files. Multiple entries per archive. Named by book UUID and cover index. |
 | `Styles` | `styles` | User-defined booklist style definitions. Exactly one per archive. |
 | `Preferences` | `preferences` | Application preferences (all key=value pairs). Exactly one per archive. |
 | `Bookshelves` | `bookshelves` | Bookshelf definitions. **Must precede `Books`** if both are present. |
@@ -111,21 +111,20 @@ When writing a ZIP or JSON backup, book records are serialised as a JSON array u
       "book_uuid": "3f8a1b2c-4d5e-6f70-8192-a3b4c5d6e7f8",
       "title": "The Name of the Wind",
       "title_original_lang": "",
-      "author": [
+      "author_list": [
         {
           "given_names": "Patrick",
           "family_name": "Rothfuss",
-          "complete_name": "",
-          "type": 1
+          "author_type": 1
         }
       ],
-      "series": [
+      "series_list": [
         {
           "title": "The Kingkiller Chronicle",
           "num": "1"
         }
       ],
-      "publisher": [
+      "publisher_list": [
         {
           "name": "DAW Books"
         }
@@ -139,8 +138,8 @@ When writing a ZIP or JSON backup, book records are serialised as a JSON array u
       "rating": 4.5,
       "read": false,
       "date_added": "2024-01-15T10:30:00Z",
-      "update_date": "2024-06-01T08:00:00Z",
-      "cover": ["3f8a1b2c-4d5e-6f70-8192-a3b4c5d6e7f8_0.jpg"]
+      "last_update_date": "2024-06-01T08:00:00Z",
+      "thumbnail.0": "3f8a1b2c-4d5e-6f70-8192-a3b4c5d6e7f8_0.jpg"
     }
   ]
 }
@@ -150,10 +149,11 @@ Key schema notes:
 
 - **`_id`**: The local database row ID. Ignored on import into a fresh database; the app assigns new IDs.
 - **`book_uuid`**: A stable UUID that persists across devices and reinstalls. This is used to match cover image files (`<uuid>_0.jpg` = front cover, `<uuid>_1.jpg` = back cover).
-- **`author`**: An array of author objects. Each has `given_names`, `family_name`, and `type` (an integer bitmask of `AuthorRole` values, e.g. 1 = Author, 2 = Translator).
-- **`series`**: An array of series objects with `title` and `num` (the position within the series, stored as a string to support values like `"1.5"`).
-- **`date_published`**, **`date_added`**, **`update_date`**: ISO 8601 strings. `update_date` is used for incremental sync (`DataReader.Updates.OnlyNewer`).
-- **`cover`**: Array of filenames (not paths) for cover images stored in the `covers/` directory of the ZIP.
+- **`author_list`**: An array of author objects. Each has `given_names`, `family_name`, and `author_type` (an integer bitmask of `AuthorRole` values, e.g. 1 = Author, 2 = Translator).
+- **`series_list`**: An array of series objects with `title` and `num` (the position within the series, stored as a string to support values like `"1.5"`).
+- **`publisher_list`**: An array of publisher objects, each with a `name` field.
+- **`date_published`**, **`date_added`**, **`last_update_date`**: ISO 8601 strings. `last_update_date` is used for incremental sync (`DataReader.Updates.OnlyNewer`).
+- **`thumbnail.0`**, **`thumbnail.1`**, …: Filename (not path) of the cover image stored in the archive for each cover slot (up to `NR_OF_BOOK_COVERS = 4` slots).
 
 ## Archive Metadata (the `info` Entry)
 

@@ -18,10 +18,13 @@ The primary backup format is a ZIP-based archive that can contain any combinatio
     Full-resolution cover art for every book in your collection. Can be large for big libraries.
   </Card>
   <Card title="Preferences" icon="sliders">
-    All app settings, custom identifiers, tag definitions, and Calibre library configurations.
+    All app settings, custom identifiers, tag definitions, and Calibre custom field definitions.
   </Card>
   <Card title="Styles" icon="palette">
     Your custom book-list display styles and sort configurations.
+  </Card>
+  <Card title="Certificates" icon="shield">
+    Named SSL/TLS certificates used for connections to self-hosted Calibre servers or other services.
   </Card>
 </CardGroup>
 
@@ -45,10 +48,11 @@ The primary backup format is a ZIP-based archive that can contain any combinatio
 
     - **Books** — your entire book database (always recommended)
     - **Covers** — cover image files (can add significant file size for large collections)
-    - **Preferences** — app settings, Calibre credentials, custom tags, and identifiers
+    - **Preferences** — app settings, custom tags, identifiers, and Calibre custom field definitions
     - **Styles** — your personalised list display styles
+    - **Certificates** — named SSL/TLS certificates for self-hosted server connections
 
-    Preferences and Styles are included by default when the ZIP format is selected.
+    Books, Covers, Preferences, Styles, and Certificates are all included by default when the ZIP format is selected.
   </Step>
   <Step title="Choose the export scope">
     Select one of the two radio buttons:
@@ -86,6 +90,7 @@ The primary backup format is a ZIP-based archive that can contain any combinatio
     - **Covers** — restores cover image files
     - **Preferences** — restores app settings, custom tags, and identifiers
     - **Styles** — restores your custom display styles
+    - **Certificates** — restores named SSL/TLS certificates for server connections
   </Step>
   <Step title="Set the conflict handling strategy">
     Choose how the app resolves conflicts when a book in the backup already exists in your current database:

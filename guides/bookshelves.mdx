@@ -1,5 +1,5 @@
 ---
-title: "Organizing Your Library with Bookshelves"
+title: "Organizing Your Book Library with Virtual Bookshelves"
 sidebarTitle: "Bookshelves"
 description: "Virtual bookshelves let you sort your collection into named groups. A single book can live on multiple shelves, and each shelf keeps its own display style."
 ---
@@ -8,25 +8,26 @@ Bookshelves are virtual containers that let you slice your library into meaningf
 
 ## The Default Shelf
 
-When you launch NeverTooManyBooks for the first time, a shelf called **My Books** is created automatically. Every book you add is placed on the currently active bookshelf by default, so your collection is never left without a home. The special **All Books** view (shown at the top of the navigation drawer) is not a real shelf — it is a virtual aggregate that always shows every book in your library regardless of shelf assignment.
+When you launch NeverTooManyBooks for the first time, a shelf called **My Books** is created automatically. Every book you add is placed on the currently active bookshelf by default, so your collection is never left without a home. The special **All Books** view is not a real shelf — it is a virtual aggregate that always shows every book in your library regardless of shelf assignment.
+
+## Switching Between Bookshelves
+
+The active bookshelf is shown in the **spinner** (drop-down selector) in the main toolbar at the top of the book list. Tap the spinner to open a list of all your shelves, then tap any name to switch to that shelf. The book list updates immediately and applies that shelf's display style.
 
 ## Creating a New Bookshelf
 
 <Steps>
-  <Step title="Open the navigation drawer">
-    Swipe right from the left edge of the screen, or tap the hamburger menu icon (☰) in the toolbar.
+  <Step title="Open the navigation menu">
+    Tap the navigation button in the main toolbar to open the app's navigation popup menu.
   </Step>
-  <Step title="Tap Manage Bookshelves">
-    Scroll to the bottom of the drawer and tap **Manage Bookshelves**. The shelf management screen opens showing all your current shelves.
+  <Step title="Tap Bookshelves">
+    Tap **Bookshelves** in the popup menu. The bookshelf management screen opens showing all your current shelves.
   </Step>
   <Step title="Tap the + button">
     Tap the **+** floating action button to open the new-shelf dialog.
   </Step>
   <Step title="Enter a name">
-    Type a name for your new shelf and tap **Save**. The shelf appears immediately in the list and in the navigation drawer.
-  </Step>
-  <Step title="Choose a style (optional)">
-    Tap the style indicator next to the new shelf to assign a specific display style. If you skip this step, the shelf inherits the app's default style.
+    Type a name for your new shelf and tap **Save**. The shelf appears immediately in the list and in the toolbar spinner.
   </Step>
 </Steps>
 
@@ -49,39 +50,35 @@ A book is assigned to bookshelves through its edit screen. You can assign one bo
   </Step>
 </Steps>
 
-## Switching Between Bookshelves
-
-Open the navigation drawer at any time and tap the name of the shelf you want to view. The book list updates immediately to show only the books on that shelf, using that shelf's assigned display style.
-
 ## Reordering Bookshelves
 
-The order of shelves in the navigation drawer matches their order in the management screen.
+The order of shelves in the toolbar spinner matches their order in the bookshelf management screen.
 
 <Steps>
-  <Step title="Open Manage Bookshelves">
-    Navigation drawer → **Manage Bookshelves**.
+  <Step title="Open Bookshelves">
+    Navigation menu → **Bookshelves**.
   </Step>
   <Step title="Drag to reorder">
     Hold the drag handle (the grip icon on the right side of each row) and drag the shelf to its new position.
   </Step>
   <Step title="Changes save automatically">
-    Release the row to drop it in place. The new order is saved immediately and reflected in the drawer.
+    Release the row to drop it in place. The new order is saved immediately and reflected in the toolbar spinner.
   </Step>
 </Steps>
 
 ## Per-Shelf Display Styles
 
-Each bookshelf can have its own **style** — a saved configuration that controls how the book list is sorted, grouped, and what fields are shown. To change the style for a shelf:
+Each bookshelf stores a reference to a **style** — a saved configuration that controls how the book list is sorted, grouped, and what fields are shown. To change the style for a shelf:
 
-1. Go to **Manage Bookshelves**.
-2. Tap the style name shown next to the shelf.
-3. Pick an existing style or create a new one.
+1. Go to **Navigation menu → Bookshelves**.
+2. Long-press the shelf you want to edit and choose **Edit**, or tap the row to open it.
+3. The style associated with this shelf is updated to your choice.
 
 When you switch to that shelf, the list automatically applies its style. This makes it easy to, for example, have a "Comics" shelf that groups by series while a "Paperbacks" shelf groups by author.
 
 ## Editing and Deleting Bookshelves
 
-Long-press any shelf in the **Manage Bookshelves** screen to reveal the edit and delete options, or tap the shelf row to open its details.
+Long-press any shelf in the bookshelf management screen to reveal the edit and delete options.
 
 <Note>
   Deleting a bookshelf does **not** delete the books that were on it. Those books simply become unassigned from the deleted shelf but remain safely in your library. If a book was only on that one shelf, it will no longer appear when browsing by shelf, but it is always visible in the **All Books** view.
@@ -89,7 +86,7 @@ Long-press any shelf in the **Manage Bookshelves** screen to reveal the edit and
 
 ## Filtering Within a Bookshelf
 
-Each bookshelf can have its own set of active filters — for example, showing only unread books or books in a specific language. Filters are configured per-shelf in the **Manage Bookshelves** screen using the filter icon next to each shelf.
+Each bookshelf can have its own set of active filters — for example, showing only unread books or books in a specific language. Filters are configured while viewing the bookshelf: open the toolbar overflow menu and tap **Filters**. The filter settings are saved per shelf, so switching shelves also switches the active filters.
 
 <Tip>
   Combine per-shelf filters with a custom style to create highly focused views — like a "Reading Queue" shelf filtered to unread books and sorted by date added.

@@ -1,10 +1,10 @@
 ---
-title: "Editing Book Records: Fields, Authors, and Series"
+title: "Editing Book Records: Fields, Authors, Series, and More"
 sidebarTitle: "Editing"
 description: "Every field in the book edit screen explained: bibliographic data, publication details, personal notes, table of contents entries, and external site IDs."
 ---
 
-The book edit screen is the central place for managing everything about a single book in your collection. It is organized into five tabs so that the many available fields stay manageable: the **Main** tab covers the core bibliographic data you reach for most often; the **Publication** tab holds acquisition and pricing data; **Notes** captures your personal relationship with the book; **TOC** records the table of contents for anthologies; and **External IDs** stores site-specific identifiers used for data lookups. All changes across every tab are held in memory until you tap the save button, so you can move freely between tabs without losing work.
+The book edit screen is the central place for managing everything about a single book in your collection. It is organized into five tabs so that the many available fields stay manageable: the **Main** tab covers core bibliographic data like title, authors, and series; the **Publication** tab holds edition and pricing data; **Notes** captures your personal relationship with the book; **TOC** records the table of contents for anthologies; and **External IDs** stores site-specific identifiers used for data lookups. All changes across every tab are held in memory until you tap the save button, so you can move freely between tabs without losing work.
 
 ## Opening the Edit Screen
 
@@ -23,18 +23,14 @@ To save all changes, tap the **✓** checkmark in the toolbar. To discard change
     |---|---|
     | **Title** | The title as printed on the cover — may be a translation. |
     | **Original Title** | The title in the book's original language, if it is a translation. |
+    | **Original Language** | The language the book was originally written in. |
     | **Authors** | One or more authors, each with an optional role (see below). |
     | **Series** | One or more series entries, each with a series title and position number. |
     | **ISBN** | ISBN-10 or ISBN-13; the end-icon button opens the barcode scanner for quick entry. |
-    | **Publisher** | Publisher name; supports multiple publishers. |
-    | **Date Published** | Publication date of this edition; accepts partial dates (year only, or year + month). |
-    | **First Publication Date** | Original publication date independent of edition. |
+    | **Tags** | One or more tags for genre or other classification (e.g. Science Fiction, Fantasy). |
     | **Language** | The language of this copy. |
-    | **Pages** | Page count stored as text to allow values like `xxxvi+278`. |
-    | **Format** | Free-text or pick-list: Paperback, Hardcover, eBook, etc. |
-    | **Color** | Color or black-and-white (primarily used for comic books). |
-    | **Genre** | Genre classification. |
     | **Bookshelves** | Which bookshelves this book belongs to (multi-select). |
+    | **Description** | A synopsis or back-cover blurb. |
 
     ### Authors
 
@@ -50,8 +46,8 @@ To save all changes, tap the **✓** checkmark in the toolbar. To discard change
       <Card title="Translator" icon="language">
         The person who translated the text.
       </Card>
-      <Card title="Illustrator" icon="image">
-        Interior illustrations.
+      <Card title="Artist" icon="image">
+        Interior artwork — illustrations or comic-book pages.
       </Card>
       <Card title="Cover Artist" icon="paintbrush">
         Artist responsible for the cover image.
@@ -61,7 +57,7 @@ To save all changes, tap the **✓** checkmark in the toolbar. To discard change
       </Card>
     </CardGroup>
 
-    Other available roles include: Foreword, Afterword, Introduction, Contributor, Cover Inker, and Cover Colorist. A single person can hold multiple roles simultaneously.
+    Other available roles include: Foreword, Afterword, Introduction, Contributor, Inking, Colorist, Storyboard, Lettering, Cover Inking, and Cover Colorist. A single person can hold multiple roles simultaneously.
 
     Author names are stored as **Given names** + **Family name** separately, which allows the app to sort by family name and display names in either order depending on your style settings.
 
@@ -77,33 +73,37 @@ To save all changes, tap the **✓** checkmark in the toolbar. To discard change
   </Tab>
 
   <Tab title="Publication">
-    The Publication tab records the commercial and acquisition details of your specific copy.
+    The Publication tab records the edition and commercial details of this specific copy.
 
     | Field | Notes |
     |---|---|
+    | **Format** | Free-text or pick-list: Paperback, Hardcover, eBook, etc. |
+    | **Color** | Color or black-and-white (primarily used for comic books). |
+    | **Publisher** | Publisher name; supports multiple publishers. |
+    | **First Publication Date** | Original publication date independent of edition. |
+    | **Date Published** | Publication date of this edition; accepts partial dates (year only, or year + month). |
+    | **Pages** | Page count stored as text to allow values like `xxxvi+278`. |
     | **Price (Listed)** | The cover price with currency selector. |
-    | **Price Paid** | What you actually paid, with currency selector. |
-    | **Date Acquired** | When you obtained this copy. |
-    | **Edition** | A bitmask of edition flags: First Edition, First Printing, Book Club, Deluxe, etc. Multiple flags can be set simultaneously. |
     | **Print Run** | Free-text field for print run information. |
-    | **Condition (Book)** | The physical condition of the book. |
-    | **Condition (Cover)** | The physical condition of the dust jacket or cover. |
-    | **Signed** | Toggle: whether your copy is signed by the author. |
+    | **Edition** | A bitmask of edition flags: First Edition, First Printing, Book Club, Deluxe, etc. Multiple flags can be set simultaneously. |
   </Tab>
 
   <Tab title="Notes">
-    The Notes tab captures your personal experience with and thoughts about a book.
+    The Notes tab captures your personal experience with and thoughts about a book, as well as acquisition and condition details.
 
     | Field | Notes |
     |---|---|
-    | **Personal Notes** | Free-text field for any notes you want to record. |
     | **Rating** | 1–5 stars in 0.5-star increments; 0 means unrated. |
     | **Read** | Reading status — see the [Reading Status](/guides/reading-status) guide for the full workflow. |
     | **Date Started** | When you began reading. |
     | **Date Finished** | When you finished reading. |
-    | **Reading Progress** | Current page or percentage complete when actively reading. |
+    | **Date Acquired** | When you obtained this copy. |
+    | **Price Paid** | What you actually paid, with currency selector. |
+    | **Condition (Book)** | The physical condition of the book. |
+    | **Condition (Cover)** | The physical condition of the dust jacket or cover. |
+    | **Signed** | Toggle: whether your copy is signed by the author. |
     | **Location** | Where the book is physically stored in your collection (e.g. shelf label, room name). |
-    | **Loaned To** | Name of the person this book is currently loaned to. |
+    | **Personal Notes** | Free-text field for any notes you want to record. |
   </Tab>
 
   <Tab title="TOC">

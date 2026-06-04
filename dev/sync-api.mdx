@@ -51,7 +51,7 @@ The three constructor parameters control important sync behaviour:
 | `hasLastUpdateDateField` | Whether the server tracks a per-book last-modified timestamp that can be used for incremental sync |
 | `syncDateIsUserEditable` | Whether the user can manually set the cut-off date in Settings |
 
-Every `SyncServer` must implement four abstract methods: `isEnabled()`, `createWriter()`, `createReader()`, `getSyncPreferencePrefix()`, and `createSyncProcessorBuilder()`.
+Every `SyncServer` must implement five abstract methods: `isEnabled()`, `createWriter()`, `createReader()`, `getSyncPreferencePrefix()`, and `createSyncProcessorBuilder()`.
 
 <Note>
 The Calibre Content Server (`CalibreCS`) is the primary reference implementation for the sync framework. If you are adding a new sync target, study the classes under `com.hardbacknutter.nevertoomanybooks.sync.calibre` — they demonstrate the full reader/writer/processor pattern end to end.
