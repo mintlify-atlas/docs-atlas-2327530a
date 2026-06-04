@@ -1,0 +1,98 @@
+---
+title: "Installing NeverTooManyBooks on Your Android Device"
+sidebarTitle: Installation
+description: "Download NeverTooManyBooks from GitHub Releases or IzzyOnDroid, verify the APK signature, and sideload it onto any Android 8.0+ phone or tablet."
+---
+
+NeverTooManyBooks is distributed as a direct APK download — it is not available on the Google Play Store. Installing it takes only a few minutes and follows the standard Android sideloading process. Before you begin, check that your device meets the requirements below, then follow the steps to download, verify, and install the app.
+
+## System Requirements
+
+| Requirement | Minimum | Recommended |
+|---|---|---|
+| Android version | 8.0 (API 26) | 10+ |
+| Tested up to | Android 16 (API 36) | — |
+| Screen size | 4″ (cramped) | 5″+ |
+| Internet connection | Required for metadata lookups | — |
+
+### Screen Size Notes
+
+- **4″ phones** — the app is fully functional but the UI will feel cramped.
+- **5″ phones** — the primary design target; everything fits comfortably.
+- **7″ and 10″ tablets** — fully supported with dedicated two-panel screen layouts that show the book list and book details simultaneously.
+
+## Download Options
+
+Choose the source that suits your workflow:
+
+<Tabs>
+  <Tab title="GitHub Releases">
+    GitHub Releases always hosts the latest stable build directly from the project maintainer.
+
+    1. Visit [github.com/tfonteyn/NeverTooManyBooks/releases](https://github.com/tfonteyn/NeverTooManyBooks/releases) on your device or a desktop browser.
+    2. Expand the latest release (currently **7.16.1**) and tap or click the `.apk` asset to download it.
+    3. Transfer the file to your Android device if you downloaded it on a desktop.
+  </Tab>
+  <Tab title="IzzyOnDroid (F-Droid)">
+    IzzyOnDroid is an F-Droid-compatible repository that tracks the same GitHub releases and lets you receive update notifications inside the F-Droid client.
+
+    - **Direct APK page:** [apt.izzysoft.de/fdroid/index/apk/com.hardbacknutter.nevertoomanybooks](https://apt.izzysoft.de/fdroid/index/apk/com.hardbacknutter.nevertoomanybooks)
+    - **Using the F-Droid client:** add the IzzyOnDroid repository (`https://apt.izzysoft.de/fdroid/repo`) and search for *NeverTooManyBooks*.
+
+    This is the recommended option if you already use F-Droid, as it handles future updates automatically.
+  </Tab>
+</Tabs>
+
+## Verifying the APK Signature
+
+Before installing, you can confirm the APK was signed by the official developer:
+
+```
+DN:      CN=ca
+SHA-256: df971ce7d58d3cdf377c32e0e2f53d6599bd7f130a50c0529c45583ddc12a008
+```
+
+Use `apksigner verify --print-certs <file.apk>` on a desktop, or a tool such as *APK Signature Verifier* on Android, to check these values match before proceeding.
+
+## Installation Steps
+
+<Steps>
+  <Step title="Download the APK">
+    Download the latest `.apk` file from [GitHub Releases](https://github.com/tfonteyn/NeverTooManyBooks/releases) or via IzzyOnDroid as described above. Note the folder where it is saved — typically **Downloads**.
+  </Step>
+  <Step title="Enable Installation from Unknown Sources">
+    Android blocks APKs from outside the Play Store by default. To allow installation:
+
+    - **Android 8.0 – 8.1:** Go to **Settings → Security → Unknown sources** and enable it.
+    - **Android 9+:** When you open the APK, Android will prompt you to allow your file manager or browser to install unknown apps. Tap **Settings**, enable the toggle, then go back and tap **Install**.
+
+    <Note>
+      You can disable the "Install unknown apps" permission again after installation is complete — it is only needed during the install step.
+    </Note>
+  </Step>
+  <Step title="Open and Install the APK">
+    Navigate to the downloaded `.apk` file using your file manager and tap it. Review the permissions summary Android presents, then tap **Install**. The installation takes only a few seconds.
+  </Step>
+  <Step title="Grant Permissions on First Launch">
+    On the first launch, NeverTooManyBooks will initialise its database and may request runtime permissions — most commonly camera access (for barcode scanning). Grant any permissions the app requests to ensure full functionality.
+
+    See the [Permissions guide](/guides/permissions) for a complete list of permissions, what each one is used for, and which are optional.
+  </Step>
+</Steps>
+
+## Google's False-Positive Security Warning
+
+<Warning>
+  On devices running recent Google Play Protect updates, NeverTooManyBooks may be flagged as a **potentially harmful** or **fake** app. This is a **false positive**. The app is 100% open-source; every line of code is publicly auditable at [github.com/tfonteyn/NeverTooManyBooks](https://github.com/tfonteyn/NeverTooManyBooks).
+
+  For background on why this happens to legitimate open-source apps distributed outside the Play Store, visit [keepandroidopen.org](https://keepandroidopen.org/).
+
+  Your options:
+  - **Ignore the warning** and proceed with installation.
+  - **Build from source** yourself — the repository contains everything you need.
+  - **Log an issue** on GitHub if you want more details, but please read keepandroidopen.org first.
+</Warning>
+
+## Updating
+
+When a new version is released, simply download and install the new APK over the existing installation — Android will recognise it as an upgrade and preserve all your data. If you use the F-Droid client with the IzzyOnDroid repository, the update will appear automatically in your F-Droid update feed.

@@ -1,0 +1,167 @@
+---
+title: "Four Ways to Add Books to Your Collection"
+sidebarTitle: "Adding Books"
+description: "Scan barcodes, enter an ISBN, search by title or author, or fill in every field by hand — four complete workflows for growing your book collection."
+---
+
+NeverTooManyBooks gives you four distinct ways to add books, each suited to a different situation. The fastest method for physical books is barcode scanning: point your camera at the ISBN barcode and the app fetches metadata from all your enabled data sources simultaneously, merging the results into a single record. If you have an ISBN but no barcode handy, you can type it manually. For books where you only know the title or author, the text-search method queries every site that supports it. Finally, you can always enter a book entirely by hand if no online source has it or you simply prefer full control.
+
+## Choosing a Method
+
+<Tabs>
+  <Tab title="Barcode Scan">
+    Barcode scanning is the quickest way to add physical books. The app uses your device camera to read EAN-13, ISBN-13, and UPC-A codes printed on the back cover.
+
+    ### Single scan
+
+    <Steps>
+      <Step title="Open the book list">
+        Tap the **+** floating action button (FAB) in the bottom-right corner of the book list.
+      </Step>
+      <Step title="Choose Scan Barcode">
+        Select **Scan Barcode** from the menu that appears.
+      </Step>
+      <Step title="Point at the barcode">
+        Hold your camera steady over the barcode on the back of the book. The scanner detects EAN-13, ISBN-13, and UPC-A formats automatically. A beep confirms a successful read.
+      </Step>
+      <Step title="Review and save">
+        The app queries all enabled search sites in parallel and merges the results. The book details screen opens pre-filled — review the data, make any corrections, and tap the **✓** checkmark to save.
+      </Step>
+    </Steps>
+
+    ### Continuous scan mode
+
+    In continuous mode, after each successful scan the scanner restarts automatically so you can work through a stack of books without returning to the menu each time. Each book opens its edit screen in sequence after you review the previous one.
+
+    ### Batch scan mode
+
+    Batch mode is designed for scanning large numbers of books quickly without stopping to review each one.
+
+    <Steps>
+      <Step title="Start batch scan">
+        Tap **+** → **Scan Barcode (Batch)**. The scanner starts immediately.
+      </Step>
+      <Step title="Scan your books">
+        Scan each book in turn. Every barcode is added to the search queue and background lookups begin automatically — you never have to wait between scans.
+      </Step>
+      <Step title="Stop scanning">
+        Tap **Stop Scanning** when you are done. The queue continues processing any remaining lookups in the background.
+      </Step>
+      <Step title="Review the queue">
+        Tap any item in the queue list to open its details, edit the record, or remove it. Confirmed books are saved to your library.
+      </Step>
+    </Steps>
+
+    <Note>
+      During a batch scan the queue accumulates all scanned ISBNs. If you leave the screen before reviewing, the queue is preserved in preferences so you can return to it later. You will be prompted to resume or discard the saved queue the next time you open the ISBN search screen.
+    </Note>
+
+    ### Embedded vs. full-screen scanner
+
+    On larger-screen devices (roughly 790 dp or taller in portrait mode) the scanner is embedded directly in the search screen alongside the ISBN field. On smaller devices a dedicated full-screen scanner activity is launched instead. Torch and zoom controls appear automatically when the embedded scanner is active and your device supports them.
+  </Tab>
+
+  <Tab title="ISBN / External ID">
+    If you have the ISBN already written down, or you want to look up a book by its site-specific identifier, this method lets you type it directly.
+
+    ### Search by ISBN
+
+    <Steps>
+      <Step title="Open the search screen">
+        Tap **+** → **Enter ISBN**. A numeric keypad appears alongside the input field.
+      </Step>
+      <Step title="Enter the ISBN">
+        Type the ISBN-10 or ISBN-13 using the on-screen keypad or your device keyboard. The field validates the check digit in real time and highlights any error. UPC-A codes are also accepted.
+      </Step>
+      <Step title="Tap Search">
+        Tap the **Search** button. The app queries all enabled sites in parallel and presents the merged result on the book details screen.
+      </Step>
+      <Step title="Save the book">
+        Review the populated fields and tap **✓** to save.
+      </Step>
+    </Steps>
+
+    If the ISBN is already in your library, a dialog appears showing the existing book's title and offering you the choice to view the existing record, add a duplicate, or cancel.
+
+    ### Search by external site ID
+
+    Some sites use their own identifier systems. You can search directly by those IDs:
+
+    <Steps>
+      <Step title="Open the external ID screen">
+        Tap **+** → **Add by External ID**.
+      </Step>
+      <Step title="Select a site">
+        Choose from the radio-button list of supported sites:
+        - **Goodreads** — numeric ID
+        - **ISFDB** — numeric ID
+        - **Open Library** — text ID (e.g. `OL7353617M`)
+        - **Amazon** — ASIN
+        - **Bedetheque**, **Bibliote.ce.pl**, **BnF**, **Databaze knih**, **DNB**, **KB NL**, **LastDodo NL**, **StripInfo.be**
+      </Step>
+      <Step title="Enter the ID and search">
+        Type or paste the identifier, then tap **Search**. The app fetches data from that specific site and opens the result for review.
+      </Step>
+    </Steps>
+
+    <Note>
+      External ID search targets a single site rather than all enabled sites. Make sure the site you select is active in **Settings → Search Sites**.
+    </Note>
+  </Tab>
+
+  <Tab title="Text Search">
+    When you only know the title, author, series, or publisher, text search lets you query enabled sites without an ISBN.
+
+    <Steps>
+      <Step title="Open text search">
+        Tap **+** → **Search by Text**.
+      </Step>
+      <Step title="Enter your search terms">
+        Fill in any combination of:
+        - **Title** — partial titles are accepted
+        - **Author** — the search field autocompletes from your existing author list
+        - **Series title** and **series number**
+        - **Publisher**
+
+        At least a title **or** an author is required before the Search button becomes active.
+      </Step>
+      <Step title="Start the search">
+        Tap **Search**. The app shows which sites support text-based searching and queries them. The first credible match returned is used to pre-fill the book details screen.
+      </Step>
+      <Step title="Review and save">
+        Any fields not returned by the search are pre-filled from your search terms so you can complete the record manually. Tap **✓** to save.
+      </Step>
+    </Steps>
+
+    <Note>
+      Not all enabled sites support text-based searching. The search screen lists the sites that will actually be queried. If no active site supports text search, the Search button is disabled and an error message is shown.
+    </Note>
+  </Tab>
+
+  <Tab title="Manual Entry">
+    For books that are not in any online database, or when you prefer to enter data yourself, you can create a fully manual record.
+
+    <Steps>
+      <Step title="Open the manual entry screen">
+        Tap **+** → **Add Manually**.
+      </Step>
+      <Step title="Fill in the fields">
+        The edit screen opens with all tabs available and no pre-filled data. Work through the tabs — **Main**, **Publication**, **Notes**, **TOC**, and **External IDs** — entering as much or as little detail as you like.
+      </Step>
+      <Step title="Add a cover (optional)">
+        Tap the cover placeholder image to open the cover menu. You can take a photo, pick an image from your gallery, or search for a cover online.
+      </Step>
+      <Step title="Save">
+        Tap **✓** to save the book to your library.
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## How Search Results Are Merged
+
+Regardless of the method used, when multiple search sites return data the app merges the results field by field, preferring the first site that provides a value for each field. This means enabling more sites generally produces more complete records, though you should always review the merged result before saving.
+
+<Tip>
+  To refresh a book's metadata from online sources after it has been saved, open the book details screen, tap the overflow menu (⋮), and choose **Update from internet**. This re-runs the search using the stored ISBN and merges any new data into the existing record — useful when a site has added cover images or corrected details since you first added the book.
+</Tip>

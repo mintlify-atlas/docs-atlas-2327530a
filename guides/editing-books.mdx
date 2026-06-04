@@ -1,0 +1,154 @@
+---
+title: "Editing Book Records: Fields, Authors, and Series"
+sidebarTitle: "Editing"
+description: "Every field in the book edit screen explained: bibliographic data, publication details, personal notes, table of contents entries, and external site IDs."
+---
+
+The book edit screen is the central place for managing everything about a single book in your collection. It is organized into five tabs so that the many available fields stay manageable: the **Main** tab covers the core bibliographic data you reach for most often; the **Publication** tab holds acquisition and pricing data; **Notes** captures your personal relationship with the book; **TOC** records the table of contents for anthologies; and **External IDs** stores site-specific identifiers used for data lookups. All changes across every tab are held in memory until you tap the save button, so you can move freely between tabs without losing work.
+
+## Opening the Edit Screen
+
+1. Tap any book row in the book list to open the details screen.
+2. Tap the **pencil** icon in the toolbar (or the floating action button if shown) to enter edit mode.
+
+To save all changes, tap the **✓** checkmark in the toolbar. To discard changes, tap the back button — you will be asked to confirm before any edits are thrown away.
+
+## Edit Tabs
+
+<Tabs>
+  <Tab title="Main">
+    The Main tab holds the fields that define what a book is bibliographically.
+
+    | Field | Notes |
+    |---|---|
+    | **Title** | The title as printed on the cover — may be a translation. |
+    | **Original Title** | The title in the book's original language, if it is a translation. |
+    | **Authors** | One or more authors, each with an optional role (see below). |
+    | **Series** | One or more series entries, each with a series title and position number. |
+    | **ISBN** | ISBN-10 or ISBN-13; the end-icon button opens the barcode scanner for quick entry. |
+    | **Publisher** | Publisher name; supports multiple publishers. |
+    | **Date Published** | Publication date of this edition; accepts partial dates (year only, or year + month). |
+    | **First Publication Date** | Original publication date independent of edition. |
+    | **Language** | The language of this copy. |
+    | **Pages** | Page count stored as text to allow values like `xxxvi+278`. |
+    | **Format** | Free-text or pick-list: Paperback, Hardcover, eBook, etc. |
+    | **Color** | Color or black-and-white (primarily used for comic books). |
+    | **Genre** | Genre classification. |
+    | **Bookshelves** | Which bookshelves this book belongs to (multi-select). |
+
+    ### Authors
+
+    Tap the **Authors** field or its end-icon to open the author list editor. You can add multiple authors and assign each a **role**:
+
+    <CardGroup cols={3}>
+      <Card title="Writer" icon="pen-nib">
+        Primary author; the default role.
+      </Card>
+      <Card title="Editor" icon="pen-to-square">
+        For edited anthologies and collections.
+      </Card>
+      <Card title="Translator" icon="language">
+        The person who translated the text.
+      </Card>
+      <Card title="Illustrator" icon="image">
+        Interior illustrations.
+      </Card>
+      <Card title="Cover Artist" icon="paintbrush">
+        Artist responsible for the cover image.
+      </Card>
+      <Card title="Narrator" icon="microphone">
+        For audiobook editions.
+      </Card>
+    </CardGroup>
+
+    Other available roles include: Foreword, Afterword, Introduction, Contributor, Cover Inker, and Cover Colorist. A single person can hold multiple roles simultaneously.
+
+    Author names are stored as **Given names** + **Family name** separately, which allows the app to sort by family name and display names in either order depending on your style settings.
+
+    <Tip>
+      The app checks for existing authors as you type and matches on a diacritic-insensitive basis. If an author with a very similar name already exists, a dialog will offer to merge or keep them separate — preventing accidental duplicates that would break grouping.
+    </Tip>
+
+    ### Series
+
+    A book can belong to multiple series simultaneously — useful for omnibus editions or cross-over volumes. Tap the **Series** field to open the series list editor. Each entry has:
+    - **Series title** — the name of the series.
+    - **Number** — the book's position within the series; accepts decimal values (e.g. `3.5`) and text annotations.
+  </Tab>
+
+  <Tab title="Publication">
+    The Publication tab records the commercial and acquisition details of your specific copy.
+
+    | Field | Notes |
+    |---|---|
+    | **Price (Listed)** | The cover price with currency selector. |
+    | **Price Paid** | What you actually paid, with currency selector. |
+    | **Date Acquired** | When you obtained this copy. |
+    | **Edition** | A bitmask of edition flags: First Edition, First Printing, Book Club, Deluxe, etc. Multiple flags can be set simultaneously. |
+    | **Print Run** | Free-text field for print run information. |
+    | **Condition (Book)** | The physical condition of the book. |
+    | **Condition (Cover)** | The physical condition of the dust jacket or cover. |
+    | **Signed** | Toggle: whether your copy is signed by the author. |
+  </Tab>
+
+  <Tab title="Notes">
+    The Notes tab captures your personal experience with and thoughts about a book.
+
+    | Field | Notes |
+    |---|---|
+    | **Personal Notes** | Free-text field for any notes you want to record. |
+    | **Rating** | 1–5 stars in 0.5-star increments; 0 means unrated. |
+    | **Read** | Reading status — see the [Reading Status](/guides/reading-status) guide for the full workflow. |
+    | **Date Started** | When you began reading. |
+    | **Date Finished** | When you finished reading. |
+    | **Reading Progress** | Current page or percentage complete when actively reading. |
+    | **Location** | Where the book is physically stored in your collection (e.g. shelf label, room name). |
+    | **Loaned To** | Name of the person this book is currently loaned to. |
+  </Tab>
+
+  <Tab title="TOC">
+    The TOC tab is used for anthologies, short story collections, and similar works where individual content items should be catalogued.
+
+    Each TOC entry has:
+    - **Title** — the title of the story, essay, or poem.
+    - **Author** — the author of that specific piece (may differ from the book's primary author).
+    - **First Publication Date** — when this piece was first published, useful for tracking reprints.
+
+    The book must be flagged as an **Anthology** (set via the Content Type field) for the TOC tab to be fully active. You can also trigger a TOC lookup from ISFDB using the overflow menu on this tab.
+  </Tab>
+
+  <Tab title="External IDs">
+    The External IDs tab stores site-specific identifiers, enabling the app to look up or sync data with individual databases.
+
+    | Site | ID Type |
+    |---|---|
+    | Amazon | ASIN (text) |
+    | Goodreads | Numeric ID |
+    | ISFDB | Numeric ID |
+    | Open Library | Text ID (e.g. `OL7353617M`) |
+    | Bedetheque | Numeric ID |
+    | BnF (France) | Numeric ID |
+    | Databaze knih | Numeric ID |
+    | DNB (Germany) | Numeric ID |
+    | KB NL | Numeric ID |
+    | LastDodo NL | Numeric ID |
+    | StripInfo.be | Numeric ID |
+    | Bibliote.ce.pl | Numeric ID |
+
+    These IDs are populated automatically when you add a book via search. You can also enter or correct them manually here.
+  </Tab>
+</Tabs>
+
+## Updating a Book from the Internet
+
+After a book is saved you can refresh its data from online sources at any time:
+
+1. Open the book details screen.
+2. Tap the overflow menu **⋮** in the toolbar.
+3. Choose **Update from internet**.
+
+The app re-runs the search using the stored ISBN (and any stored external IDs), then merges fresh data into the existing record. Fields you have edited manually are not overwritten if the **Auto-update** flag is disabled for that book — toggle it in the overflow menu to lock a record against automatic updates.
+
+<Tip>
+  Publisher names, like author names, are deduplicated when you save. If you type a publisher name that already exists in your database (case-insensitively), the app reuses the existing entry rather than creating a second one — keeping your grouping and filtering consistent.
+</Tip>

@@ -1,0 +1,116 @@
+{
+  "projectType": "saas",
+  "projectName": "NeverTooManyBooks",
+  "projectDescription": "An Android app to catalog and manage your personal book and comics collection, with barcode scanning, multi-source metadata lookup, and Calibre sync.",
+  "theme": "almond",
+  "primaryColor": "#5c5c5c",
+  "lightColor": "#2e2e2e",
+  "darkColor": "#c1c1c1",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "User Guide",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Managing Your Library",
+            "pages": [
+              "guides/adding-books",
+              "guides/bookshelves",
+              "guides/editing-books",
+              "guides/covers",
+              "guides/reading-status"
+            ]
+          },
+          {
+            "group": "Search & Data Sources",
+            "pages": [
+              "guides/search-overview",
+              "guides/search-engines",
+              "guides/calibre-sync"
+            ]
+          },
+          {
+            "group": "Import & Export",
+            "pages": [
+              "guides/backup-restore",
+              "guides/import-export"
+            ]
+          },
+          {
+            "group": "Settings & Customization",
+            "pages": [
+              "guides/settings",
+              "guides/styles-and-grouping",
+              "guides/permissions"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Developer Reference",
+        "groups": [
+          {
+            "group": "Architecture",
+            "pages": [
+              "dev/architecture",
+              "dev/building",
+              "dev/data-model"
+            ]
+          },
+          {
+            "group": "Extending the App",
+            "pages": [
+              "dev/search-engine-api",
+              "dev/sync-api",
+              "dev/backup-format"
+            ]
+          },
+          {
+            "group": "Contributing",
+            "pages": [
+              "dev/contributing",
+              "dev/translations"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Add books by barcode scan, ISBN lookup, or free-text search",
+    "Fetch metadata from 20+ international data sources (Amazon, Google Books, OpenLibrary, ISFDB, Goodreads, BnF, DNB, and more)",
+    "Organize books across multiple virtual bookshelves",
+    "Customizable booklist styles with flexible grouping (author, series, genre, date read, etc.)",
+    "Track reading status and reading progress (page / percentage)",
+    "Cover image management with multi-source browser",
+    "Calibre Content Server two-way synchronization",
+    "Full backup and restore (ZIP/JSON/CSV/XML formats)",
+    "Import from Book Catalogue and other sources",
+    "Support for books and European comics (Bedetheque, StripInfo, LastDodo)",
+    "Tablet-optimized dual-pane layout",
+    "20+ UI languages with Weblate translation support"
+  ],
+  "publicApiSurface": [
+    "SearchEngine interface (ByIsbn, ByText, ByExternalId, CoverByEdition sub-interfaces)",
+    "EngineId — registry of all search engine identifiers",
+    "Book entity — primary data model with DBKey field constants",
+    "Author, Series, Publisher, Bookshelf, TocEntry entities",
+    "ExportHelper / ImportHelper — backup/restore orchestration",
+    "DataWriter / DataReader interfaces — pluggable archive format support",
+    "RecordType enum — supported record types in archives",
+    "SyncServer / SyncReaderHelper / SyncWriterHelper — sync framework",
+    "CalibreContentServer — Calibre integration client",
+    "BooklistGroup / GroupKey — booklist grouping and style system",
+    "Style / UserStyle / BuiltinStyle — list display style configuration",
+    "ServiceLocator — app-wide dependency injection entry point",
+    "DBKey — canonical database and bundle key constants"
+  ]
+}

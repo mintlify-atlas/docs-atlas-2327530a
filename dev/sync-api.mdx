@@ -1,0 +1,253 @@
+---
+title: "Sync API: Connecting NeverTooManyBooks to External Servers"
+sidebarTitle: Sync API
+description: Understand how the sync framework ties together SyncServer, DataReader, DataWriter, and per-field SyncActions to import and export your book collection.
+---
+
+NeverTooManyBooks can synchronise your library with external services — currently a Calibre Content Server and the StripInfo.be website. The sync framework is built on a small set of composable abstractions: a `SyncServer` enum identifies the target, `DataReader` and `DataWriter` interfaces handle the data transport, and a per-field `SyncAction` system gives users fine-grained control over what gets updated on import. This page explains each layer so you can understand how sync works and extend it to a new server if needed.
+
+## SyncServer: Registering a Sync Target
+
+`SyncServer` is an enum in `com.hardbacknutter.nevertoomanybooks.sync` that acts as the registry of all supported sync destinations. Each constant is both a label and a factory for the reader and writer that talk to that destination:
+
+```java
+public enum SyncServer implements Parcelable {
+
+    /** A Calibre Content Server. */
+    CalibreCS(R.string.lbl_calibre_content_server,
+              /* hasLastUpdateDateField = */ true,
+              /* syncDateIsUserEditable = */ true) {
+
+        @Override
+        public boolean isEnabled() {
+            return CalibreHandler.isSyncEnabled();
+        }
+
+        @Override
+        DataWriter<SyncWriterResults> createWriter(...) { ... }
+
+        @Override
+        DataReader<SyncReaderMetaData, ReaderResults> createReader(...) { ... }
+
+        @Override
+        public String getSyncPreferencePrefix() {
+            return CalibreContentServer.PREFERENCE_KEY + FIELDS_UPDATE;
+        }
+
+        @Override
+        public SyncReaderProcessor.Builder createSyncProcessorBuilder(Context context) { ... }
+    },
+
+    /** StripInfo.be website. */
+    StripInfo(R.string.site_stripinfo_be, false, false) { ... };
+}
+```
+
+The three constructor parameters control important sync behaviour:
+
+| Parameter | Meaning |
+|---|---|
+| `labelResId` | String resource shown in the sync selection UI |
+| `hasLastUpdateDateField` | Whether the server tracks a per-book last-modified timestamp that can be used for incremental sync |
+| `syncDateIsUserEditable` | Whether the user can manually set the cut-off date in Settings |
+
+Every `SyncServer` must implement four abstract methods: `isEnabled()`, `createWriter()`, `createReader()`, `getSyncPreferencePrefix()`, and `createSyncProcessorBuilder()`.
+
+<Note>
+The Calibre Content Server (`CalibreCS`) is the primary reference implementation for the sync framework. If you are adding a new sync target, study the classes under `com.hardbacknutter.nevertoomanybooks.sync.calibre` — they demonstrate the full reader/writer/processor pattern end to end.
+</Note>
+
+## DataReader and DataWriter
+
+The `DataReader` and `DataWriter` interfaces in `com.hardbacknutter.nevertoomanybooks.io` are the generic I/O contracts used by both the sync system and the file-based backup system.
+
+<Tabs>
+  <Tab title="DataReader">
+    ```java
+    @FunctionalInterface
+    public interface DataReader<METADATA, RESULT> extends Closeable {
+
+        /** Read archive/server metadata (book counts, version, etc.). */
+        @WorkerThread
+        @NonNull
+        default Optional<METADATA> readMetaData(@NonNull Context context)
+                throws DataReaderException, CredentialsException,
+                       StorageException, IOException { ... }
+
+        /** Validate that the source looks well-formed before a full read. */
+        @WorkerThread
+        default void validate(@NonNull Context context)
+                throws DataReaderException, CredentialsException, IOException { }
+
+        /** Perform the full import, returning a results summary. */
+        @WorkerThread
+        @NonNull
+        RESULT read(@NonNull Context context,
+                    @NonNull ProgressListener progressListener)
+                throws DataReaderException, CredentialsException,
+                       StorageException, IOException;
+
+        default void cancel() { }
+
+        @Override
+        default void close() throws IOException { }
+    }
+    ```
+
+    `readMetaData` is called first to give the UI a preview of what will be imported. `validate` runs lightweight checks (e.g. confirming the Calibre server version is supported). `read` is the heavy operation that processes every book record.
+  </Tab>
+  <Tab title="DataWriter">
+    ```java
+    @FunctionalInterface
+    public interface DataWriter<RESULT> extends Closeable {
+
+        /** Perform a full export/upload, returning a results summary. */
+        @WorkerThread
+        @NonNull
+        RESULT write(@NonNull Context context,
+                     @NonNull ProgressListener progressListener)
+                throws DataWriterException, CredentialsException,
+                       StorageException, IOException;
+
+        default void cancel() { }
+
+        @Override
+        default void close() throws IOException { }
+    }
+    ```
+
+    `write` is the single required method. Writers obtain the record types to export from their constructor arguments (passed down from `SyncServer.createWriter`). The `cancel()` default can be overridden to abort mid-stream uploads.
+  </Tab>
+  <Tab title="Updates enum">
+    The `DataReader.Updates` enum controls how already-existing local records are treated during an import:
+
+    ```java
+    enum Updates {
+        /** Leave existing local data untouched. */
+        Skip,
+        /** Replace local data with the incoming data unconditionally. */
+        Overwrite,
+        /** Import only if the incoming record is newer (uses the update_date field). */
+        OnlyNewer
+    }
+    ```
+
+    `SyncReaderHelper` selects `OnlyNewer` by default for servers that provide `hasLastUpdateDateField`, and `Skip` for those that do not.
+  </Tab>
+</Tabs>
+
+## SyncReaderHelper and SyncWriterHelper
+
+These two classes orchestrate the lifecycle of a sync operation from the UI layer. Neither is a `ViewModel` or an Android component — they are plain coordinators that hold configuration and create the underlying reader or writer.
+
+**`SyncReaderHelper`** (extends `DataReaderHelperBase`):
+- Holds the target `SyncServer` and a `SyncReaderProcessor.Builder`
+- Pre-populates `RecordType.Books` and `RecordType.Cover` as the default record types to import
+- Accepts an optional `LocalDateTime syncDate` to limit the import to records newer than a given date
+- Accepts extra arguments in a `Bundle` for server-specific parameters (e.g. which Calibre library to read from)
+
+**`SyncWriterHelper`** (extends `DataWriterHelperBase`):
+- Holds the target `SyncServer`
+- Pre-populates `RecordType.Books` and `RecordType.Cover` as defaults
+- Has a `deleteLocalBooks` flag: when `true`, books removed from the remote server are also deleted locally
+- Also carries a server-specific `Bundle extraArgs`
+
+Both helpers delegate actual I/O to the `DataReader`/`DataWriter` instances created by `SyncServer.createReader()` / `SyncServer.createWriter()`.
+
+## SyncField and SyncAction
+
+The sync framework gives users per-field control over what happens to each book attribute during an import. Two types drive this:
+
+**`SyncField`** represents a single book field that participates in sync — for example, the book title, an author list, or a cover image. Each `SyncField` has:
+- A `Type` (`STRING`, `LIST`, or `OTHER`) that determines which `SyncAction` values make sense
+- A database key (`fieldKey`) that maps it to the local `Book` object
+- An optional `enabledKey` for fields that can be toggled independently
+
+**`SyncAction`** is the per-field policy enum. The user selects one action per field in the sync settings screen:
+
+```java
+public enum SyncAction implements Parcelable {
+    /** Ignore this field completely. The local value is never touched. */
+    Skip(0),
+
+    /** Write the incoming value only when the local field is null or empty. */
+    CopyIfBlank(1),
+
+    /**
+     * Append incoming values to the local list.
+     * For list-type fields (authors, series, tags) new entries are added;
+     * existing entries are left in place.
+     */
+    Append(2),
+
+    /** Always replace the local value with the incoming one, regardless of what is there. */
+    Overwrite(3);
+}
+```
+
+<Tip>
+The `createSyncProcessorBuilder` method on each `SyncServer` sets the **default** action for every field. Scalar/string fields default to `CopyIfBlank`; list fields (authors, series, tags, publishers) default to `Append`. The user can override these defaults from the server's settings screen.
+</Tip>
+
+## SyncReaderProcessor
+
+`SyncReaderProcessor` applies the configured `SyncAction` for each field to every book record received from the sync source. It is built from a `SyncReaderProcessor.Builder` that collects all the `SyncField` definitions and reads back the user's chosen actions from SharedPreferences.
+
+The processor is created inside `SyncServer.createReader()`:
+
+```java
+// SyncServer.CalibreCS — createReader() excerpt
+final SyncReaderProcessor syncProcessor =
+        Objects.requireNonNullElseGet(
+                syncProcessorBuilder,
+                () -> createSyncProcessorBuilder(context))
+               .build(context);
+
+final DataReader<SyncReaderMetaData, ReaderResults> reader =
+        new CalibreContentServerReader(context, recordTypes,
+                                        syncProcessor, syncDate,
+                                        updateOption, extraArgs);
+reader.validate(context);
+return reader;
+```
+
+A custom `syncProcessorBuilder` can be passed in (for testing or programmatic usage); when null the server's own default builder is used. This pattern means tests can inject a known processor without touching preferences.
+
+## Worked Example: Field-Level Sync Flow
+
+The sequence below shows what happens when a Calibre sync import runs for a single book:
+
+<Steps>
+  <Step title="SyncReaderHelper creates the reader">
+    `SyncReaderHelper` calls `SyncServer.CalibreCS.createReader(...)`, which builds a `SyncReaderProcessor` from stored preferences and returns a `CalibreContentServerReader`.
+  </Step>
+  <Step title="readMetaData is called">
+    The reader connects to the Calibre server and fetches library metadata (library name, book count, server version). This is shown to the user in the confirmation dialog before the import starts.
+  </Step>
+  <Step title="validate is called">
+    The reader confirms the server API version is supported and that credentials are valid. A `CredentialsException` here prompts the user to re-enter their password.
+  </Step>
+  <Step title="read iterates book records">
+    For each book returned by the Calibre API, the `CalibreContentServerReader` builds a `Book` bundle and passes it to `SyncReaderProcessor.process(context, localBook, incomingBook)`.
+  </Step>
+  <Step title="SyncReaderProcessor applies SyncActions">
+    For every registered `SyncField`, the processor checks the stored `SyncAction`. A title field set to `CopyIfBlank` is only written if `localBook.getTitle()` is empty. An author list field set to `Append` merges the incoming author list with the existing one, avoiding duplicates.
+  </Step>
+  <Step title="Results are returned">
+    After all records are processed, `read` returns a `ReaderResults` object with counts of books created, updated, and skipped. These counts are displayed to the user in the completion dialog.
+  </Step>
+</Steps>
+
+## Adding a New Sync Server
+
+To wire up an entirely new sync target, add a new constant to `SyncServer` and implement the five abstract methods. Concretely:
+
+1. Create a `DataReader` implementation that connects to your server, fetches book records, and maps them onto `Book` bundles
+2. Create a `DataWriter` implementation that reads local books and pushes updates back to your server
+3. Implement `createSyncProcessorBuilder()` to declare which fields your server supports and their default actions
+4. Implement `getSyncPreferencePrefix()` with a stable, unique preference key prefix
+5. Implement `isEnabled()` — typically delegating to a handler class or a `BuildConfig` flag for gating in-development servers
+
+<Tip>
+Read the full source of `com.hardbacknutter.nevertoomanybooks.sync.calibre` as a complete, production-quality reference. It covers OAuth-style certificate handling, incremental sync using `hasLastUpdateDateField`, Calibre-specific custom fields, and library selection.
+</Tip>

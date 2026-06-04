@@ -1,0 +1,198 @@
+---
+title: "Import and Export Books Across CSV, JSON, and More"
+sidebarTitle: "Import & Export"
+description: "Exchange your book data as CSV, JSON, or legacy Book Catalogue archives — covering format details, field mapping, and conflict handling for each option."
+---
+
+NeverTooManyBooks can read and write your collection in several formats beyond its native ZIP backup. CSV lets you audit or bulk-edit data in a spreadsheet; JSON preserves every relationship in a single portable file; and legacy Book Catalogue `.tar` archives import directly with no manual field mapping. Each format is auto-detected by inspecting the file's content — you do not need to specify a format before selecting a file.
+
+<Tabs>
+  <Tab title="CSV">
+    ## CSV export
+
+    CSV export writes every book in your collection as a flat, comma-separated text file encoded in **UTF-8**. Each book occupies one row; columns represent individual fields. The file can be opened directly in Google Sheets, Microsoft Excel, LibreOffice Calc, or any other spreadsheet application.
+
+    <Tip>
+      Use CSV export to audit your collection in a spreadsheet. You can sort by date added, spot missing ISBN values, check for duplicate titles, or build custom reading-progress reports — then use the result as a reference while manually updating records in the app.
+    </Tip>
+
+    ### How to export to CSV
+
+    <Steps>
+      <Step title="Open the Backup & Export screen">
+        Tap the navigation menu and choose **Backup & Export**.
+      </Step>
+      <Step title="Select the CSV format">
+        Open the **Archive format** dropdown and choose **CSV**. The covers and preferences checkboxes are automatically hidden — CSV carries book records only.
+      </Step>
+      <Step title="Pick a save location">
+        Tap the upload button. The Android file picker opens. The app proposes a filename in the format `ntmb-YYYY-MM-DD.csv`.
+      </Step>
+      <Step title="Wait for completion">
+        The progress dialog runs through your books. When finished, a summary reports the number of records written.
+      </Step>
+    </Steps>
+
+    ---
+
+    ## CSV import
+
+    The CSV reader accepts files exported by NeverTooManyBooks itself as well as files from **Book Catalogue**, **Goodreads**, and **Calibre**. The format is detected automatically by inspecting the header row:
+
+    | Detected format | Header signature |
+    |---|---|
+    | NeverTooManyBooks / Book Catalogue | Starts with `"_id","author_details","title","isbn"` or `"_id",` |
+    | Goodreads | Contains columns `Book Id`, `Author l-f`, `Exclusive Shelf` |
+    | Calibre | Contains columns `library_name`, `author_sort`, `title` |
+
+    <Note>
+      CSV import adds book records directly from the file. It does **not** reach out to any online search engine (Google Books, Open Library, etc.) to fill in missing metadata. If your CSV has incomplete data — for example, a title but no author — what you import is exactly what the file contains.
+    </Note>
+
+    ### How to import from CSV
+
+    <Steps>
+      <Step title="Open the Import screen">
+        Tap the navigation menu and choose **Import**. The file picker opens immediately.
+      </Step>
+      <Step title="Select your CSV file">
+        Pick the `.csv` file. The app reads the header row, detects the format, and displays the detected format name in the archive info area.
+      </Step>
+      <Step title="Confirm the warning">
+        Because CSV import can modify your database, the app shows a confirmation dialog before proceeding. The app automatically creates an internal database backup before the import begins.
+      </Step>
+      <Step title="Wait for completion">
+        The progress dialog processes each row. A summary at the end reports how many books were added or updated, and lists any rows that could not be parsed (up to 10 failure messages are shown on screen; all failures are written to the log).
+      </Step>
+    </Steps>
+
+    <Warning>
+      Calibre CSV exports do not escape line breaks inside the `comments` or `#notes` fields. If your Calibre export contains those columns, the import will be rejected to prevent data corruption. Use Calibre's JSON or other structured export formats instead.
+    </Warning>
+  </Tab>
+
+  <Tab title="JSON">
+    ## JSON export
+
+    The JSON format exports all book data — including authors, series, publishers, and bookshelf assignments — as structured objects in a single `.json` file. Unlike CSV, JSON preserves the full relational structure of your data: a book's authors are not flattened into a string but stored as proper objects with name parts and roles.
+
+    JSON export also includes **Preferences**, **Styles**, and **Certificates**, but does **not** include cover images. Use the ZIP backup format when you need covers.
+
+    ### What JSON contains
+
+    | Record type | Included |
+    |---|---|
+    | Books (full data) | ✅ |
+    | Bookshelves | ✅ (embedded with books) |
+    | Styles | ✅ |
+    | Preferences & identifiers | ✅ |
+    | Certificates | ✅ |
+    | Cover images | ❌ |
+
+    ### How to export to JSON
+
+    <Steps>
+      <Step title="Open the Backup & Export screen">
+        Tap the navigation menu and choose **Backup & Export**.
+      </Step>
+      <Step title="Select the JSON format">
+        Open the **Archive format** dropdown and choose **JSON**. Books are always included. The covers checkbox is disabled (covers are not supported by this format). Preferences and Styles are not included in the JSON export.
+      </Step>
+      <Step title="Choose the export scope">
+        Select **All books** for a complete export, or **New and updated** for an incremental export containing only books changed since the last full export.
+      </Step>
+      <Step title="Pick a save location and start">
+        Tap the upload button, choose a destination, and wait for the progress dialog to finish.
+      </Step>
+    </Steps>
+
+    ---
+
+    ## JSON import
+
+    <Steps>
+      <Step title="Open the Import screen">
+        Tap the navigation menu and choose **Import**. The file picker opens.
+      </Step>
+      <Step title="Select the JSON file">
+        Pick the `.json` file. The app detects the JSON format automatically by reading the first bytes of the file (`{"`) and displays the archive metadata.
+      </Step>
+      <Step title="Choose what to restore">
+        Toggle the checkboxes for **Books**, **Preferences**, and **Styles** as needed. The covers option is hidden because JSON archives never contain image data.
+      </Step>
+      <Step title="Set the conflict handling strategy">
+        Choose **New only (Skip)**, **New and updated**, or **All (Overwrite)** to control how existing records are handled. The default is **New and updated**.
+      </Step>
+      <Step title="Start the import">
+        Tap the download button and wait for the summary dialog.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Book Catalogue">
+    ## Importing from Book Catalogue
+
+    NeverTooManyBooks was forked from **Book Catalogue 5.2.2**, and it retains full compatibility with Book Catalogue backup archives. If you are migrating from Book Catalogue — or from an early NTMB 1.x–3.x release — you can import your backup file directly with no manual field mapping required.
+
+    Book Catalogue backups use a **TAR archive** format (uncompressed, `.tar` extension). The app detects this format by reading the TAR magic bytes at offset `0x101` in the file header, so the filename extension does not matter.
+
+    ### What a Book Catalogue archive contains
+
+    | Record type | Supported on import |
+    |---|---|
+    | Books | ✅ |
+    | Cover images | ✅ |
+    | Preferences | ❌ (not in BC format) |
+    | Styles | ❌ (not in BC format) |
+
+    <Note>
+      Field mapping between the Book Catalogue schema and the NeverTooManyBooks database is handled automatically. Author names, bookshelf names, series data, and ISBN values are all read from the BC format and written into the equivalent NTMB fields without any manual configuration.
+    </Note>
+
+    ### How to import a Book Catalogue backup
+
+    <Steps>
+      <Step title="Locate your Book Catalogue backup file">
+        Book Catalogue stored its backups in the `BookCatalogue` folder on external storage (typically `sdcard/BookCatalogue/`). Copy the backup file to a location accessible via the Android file picker (internal storage or cloud storage).
+      </Step>
+      <Step title="Open the Import screen">
+        In NeverTooManyBooks, tap the navigation menu and choose **Import**. The file picker opens immediately.
+      </Step>
+      <Step title="Select the Book Catalogue backup file">
+        Navigate to your `.tar` backup file and select it. The app reads the TAR header, identifies the format, and shows the archive metadata (creation date, book count, image count).
+      </Step>
+      <Step title="Choose what to import">
+        The Books and Covers checkboxes are available. Preferences and Styles are not applicable to TAR archives and are hidden automatically.
+      </Step>
+      <Step title="Set the conflict handling strategy">
+        If you are doing a fresh import into an empty database, any setting works. If you already have some books, choose **New and updated** to preserve any edits you have made since the backup was created.
+      </Step>
+      <Step title="Start the import">
+        Tap the download button. The progress dialog processes each book and its cover. A summary dialog reports the final counts when the import is complete.
+      </Step>
+    </Steps>
+
+    <Tip>
+      After a successful Book Catalogue import, do a full ZIP backup immediately. Going forward, use the native ZIP format for all subsequent backups — it is faster to write, supports incremental exports, and includes your styles and preferences.
+    </Tip>
+
+    ### CSV files from Book Catalogue
+
+    Book Catalogue also supported exporting books to CSV. Those CSV files use the same column layout as the NTMB CSV format (header starts with `_id,author_details,title,isbn`) and are detected as **BC format** during import. You can import them via **Import → pick the CSV file** exactly as you would any other CSV import.
+  </Tab>
+</Tabs>
+
+---
+
+## Format comparison
+
+| Feature | ZIP (backup) | JSON | CSV | TAR (Book Catalogue) |
+|---|---|---|---|---|
+| Books | ✅ | ✅ | ✅ | ✅ |
+| Cover images | ✅ | ❌ | ❌ | ✅ |
+| Bookshelves | ✅ | ✅ | ❌ | ❌ |
+| Styles | ✅ | ❌ | ❌ | ❌ |
+| Preferences | ✅ | ❌ | ❌ | ❌ |
+| Incremental export | ✅ | ✅ | ❌ | N/A |
+| Open in spreadsheet | ❌ | ❌ | ✅ | ❌ |
+| Import only | ❌ | ❌ | ❌ | ✅ |

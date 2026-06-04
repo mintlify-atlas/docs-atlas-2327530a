@@ -1,0 +1,201 @@
+---
+title: "Configuring NeverTooManyBooks: All Settings Explained"
+sidebarTitle: "Settings"
+description: "A complete walkthrough of every settings category in NTMB — from theme and language through search sites, cover caching, and advanced maintenance tools."
+---
+
+NeverTooManyBooks exposes a rich settings screen that lets you tailor almost every aspect of the app to your reading habits and device. Settings are grouped into logical sections — User Interface, Search, Images, Lists, and Advanced — so you can dive straight into the area you want to change without wading through unrelated options.
+
+<Tip>
+  Open Settings from any screen by tapping the **menu icon** (three-dot or hamburger, depending on your layout) and selecting **Settings** (the gear ⚙ icon). Changes take effect immediately; a few display options require the app to recreate the current screen, which happens automatically.
+</Tip>
+
+---
+
+## Settings Sections
+
+<Accordion title="User Interface">
+  The User Interface section controls the look and feel of the entire app. Changes to language or theme colour take effect as soon as you leave the sub-screen.
+
+  | Setting | What it does |
+  |---|---|
+  | **Language** | Override the system locale. Choose any supported language; the app restarts the current screen instantly to apply it. Defaults to the system locale. |
+  | **Theme** | Switch between Light, Dark, or System Default (follows the Android day/night toggle). |
+  | **Theme Colour** | Select a colour accent for the UI. On Android 12+ you can also enable **Dynamic Colour**, which picks accent colours from your wallpaper. This option is disabled on Android 11 and below. |
+  | **System bars behaviour** | Control whether the top menu/action bar scrolls off-screen with content or stays pinned. Changing this recreates the current activity immediately. |
+  | **Dialog mode** | Choose whether secondary screens open as full-screen dialogs or inline panes. Defaults to automatic selection based on screen size. |
+  | **Context menus** | Choose how long-press context menus appear — as popup menus with icons, text-only lists, or automatic selection based on screen and menu size. |
+  | **Fast-scroller drag handle** | Select the visual style of the drag handle shown during fast-scrolling in long lists. Changes require the activity to be recreated (happens on back navigation). |
+
+  <Note>
+    Language and theme-colour changes are applied by recreating the current activity. Your scroll position and open items are preserved across the recreate.
+  </Note>
+</Accordion>
+
+<Accordion title="Search">
+  The Search section controls which online book databases NTMB queries and how it handles the data it retrieves.
+
+  | Setting | What it does |
+  |---|---|
+  | **Websites** | Open the full search-site manager where you can enable or disable individual sites, reorder them by drag-and-drop, and configure per-site credentials or options (e.g. API keys, locale overrides). |
+  | **Allow metered network** | When enabled the app will use mobile data as well as Wi-Fi for online searches. Disable this if you want to restrict lookups to Wi-Fi only. Enabled by default. |
+  | **Reformat Format field** | Automatically normalises the book format value returned by search sites (e.g. "Hardcover", "HC", "Hard cover" → a single canonical form). |
+  | **Reformat Color field** | Same normalisation applied to the colour/cover-colour field. |
+
+  ### Sorting
+
+  | Setting | What it does |
+  |---|---|
+  | **Sort titles reordered** | When enabled, articles are moved to the end for ordering purposes — "The Lord of the Rings" sorts as "Lord of the Rings, The". Changing this schedules a rebuild of all order-by columns; you will be prompted to confirm before the rebuild runs. |
+  | **Deduplication title matching** | When searching for duplicates, also try matching on the reordered form of a title so "A Game of Thrones" and "Game of Thrones, A" are treated as identical. |
+</Accordion>
+
+<Accordion title="Style Defaults">
+  The **Edit Defaults** entry opens the global style defaults editor — the same interface used to configure individual styles, but applied as the baseline for all new styles. Settings here include cover scale, text scale, book-level field visibility, and group-specific options.
+
+  See [Styles & Grouping](/guides/styles-and-grouping) for a full explanation of every style option.
+</Accordion>
+
+<Accordion title="Edit (Book Editing)">
+  These settings govern behaviour when adding or editing books.
+
+  | Setting | What it does |
+  |---|---|
+  | **Images** | Opens the image/cover sub-screen (see [Cover & Images](#cover-images) below). |
+  | **Capitalise title** | Controls how the title field is auto-capitalised when you type: no capitalisation, first word only, or all words (default). |
+  | **ISBN checks** | How strictly the app validates an ISBN you enter: Strict (must be a valid ISBN-10 or ISBN-13), Loose (allows common transcription variants), or None. Defaults to Loose. |
+  | **Barcode scanner** | Opens the barcode scanner sub-screen where you can choose the scanner engine and configure any engine-specific options. |
+</Accordion>
+
+<Accordion title="Cover & Images">
+  Controls how cover images are fetched, stored, and cached.
+
+  | Setting | What it does |
+  |---|---|
+  | **Auto-rotate camera image** | After taking a photo with the camera, automatically rotate it by 0°, 90°, 180°, or 270° before using it as a cover. |
+  | **Camera next action** | What happens after the camera captures a cover: do nothing (return to the book editor), crop, or directly accept. |
+  | **Enable cover undo** | Keep the previous cover in a temporary slot so you can revert a cover change with a single tap. Enabled by default. |
+  | **Cache resized images** | When enabled, resized/thumbnail versions of covers are stored on disk so they don't need to be regenerated each time. Disabling this saves storage at the cost of slightly slower list scrolling. |
+  | **Purge image cache** | Immediately deletes all cached resized cover thumbnails. Only available when the image cache is enabled. The summary shows the current count of cached images. |
+
+  <Tip>
+    The image cache stores **resized** thumbnails, not your original full-resolution covers. Purging it is safe — thumbnails will be regenerated on demand from the originals.
+  </Tip>
+</Accordion>
+
+<Accordion title="Lists">
+  Controls how the main book list behaves and is rendered.
+
+  | Setting | What it does |
+  |---|---|
+  | **List rebuild state** | When you reopen the app, restore the list to the exact same scroll/expansion state as when you left it (Saved State), always fully expanded, or always fully collapsed. |
+  | **Row context menu** | Choose when the row context menu button (three-dot on each row) is shown: always visible, only on long-press, or automatic. |
+  | **Fast-scroller overlay** | The bubble style shown while dragging the fast-scroller thumb — choose between different Material Design overlay styles. Changing this recreates the activity on back navigation. |
+</Accordion>
+
+<Accordion title="Advanced Options">
+  The Advanced section contains tools for managing tags, identifiers, field visibility, lending, external sync, and storage.
+
+  ### Tags
+  Opens the Tag admin screen where you can rename, merge, or delete tags across your entire library. Any structural change that affects grouping will schedule a booklist rebuild.
+
+  ### Identifiers
+  Opens the Identifier type editor, letting you rename or reorder the types of external identifiers (e.g. LibraryThing ID, Open Library ID) that appear on the book detail tabs. Enabling the **Allow editing external ID** toggle reveals a dedicated tab in the book editor for each identifier type.
+
+  ### Field Visibility
+  Opens the field visibility screen (see [Field Visibility](#field-visibility) below).
+
+  ### Lending
+  Toggle whether the lending feature (track who has borrowed a book) is active. Disabling it hides the loanee field from both the list and the edit screens.
+
+  ### Calibre Content Server
+  Connect NTMB to a running [Calibre](https://calibre-ebook.com/) Content Server on your local network. Shows **Enabled** or **Disabled** in the summary.
+
+  ### Storage Volume
+  On Android 9+, switch between internal shared storage and an SD card for storing cover images. You will be offered the option to move existing covers to the new location or simply switch without moving. Not available on Android 8.x.
+
+  ### Maintenance
+  Opens the Maintenance screen with the following tools:
+
+  <CardGroup cols={2}>
+    <Card title="Rebuild FTS Index" icon="magnifying-glass">
+      Rebuilds the full-text search index used by the in-app search. Run this if searches return incomplete results.
+    </Card>
+    <Card title="Rebuild Index" icon="arrow-rotate-right">
+      Recreates the database index used for sorting and grouping the booklist. Run this if the list looks out of order.
+    </Card>
+    <Card title="Purge Files" icon="trash">
+      Removes orphaned files (e.g. cover images for books that no longer exist in the database).
+    </Card>
+    <Card title="Purge Node States" icon="list-tree">
+      Clears the saved expansion state of every group row in the book list.
+    </Card>
+    <Card title="Sync Deleted Books" icon="rotate">
+      Synchronises the list of locally deleted books with any connected sync sources.
+    </Card>
+    <Card title="Create Bug Report" icon="bug">
+      Packages the application log and diagnostic information into a file you can share with the developer.
+    </Card>
+  </CardGroup>
+</Accordion>
+
+---
+
+## Field Visibility
+
+The **Field Visibility** screen (reachable via **Settings → Advanced → Field Visibility**) controls which book data fields are available throughout the app. Fields you hide here will not appear in the book detail view or book editor. The list is displayed in locale-alphabetical order for easy scanning.
+
+Fields you can show or hide include:
+
+<Tabs>
+  <Tab title="Covers & Images">
+    | Field | Notes |
+    |---|---|
+    | Front cover | Always recommended; disabling hides it everywhere |
+    | Back cover | Secondary cover image |
+    | Image 2 / Image 3 | Additional cover images |
+  </Tab>
+  <Tab title="Bibliographic">
+    | Field | Notes |
+    |---|---|
+    | Series | Includes series number and completion flag |
+    | Publisher | |
+    | ISBN | |
+    | Publication date | |
+    | First publication date | |
+    | Original title | Translated title metadata |
+    | Original language | |
+    | Pages | |
+    | Format | |
+    | Edition | |
+    | Print run | |
+    | Table of contents | |
+    | Author role | Shows the specific role (e.g. Translator, Editor) |
+    | Author pseudonym | |
+    | Language | Book language |
+    | Description | Book synopsis/blurb |
+  </Tab>
+  <Tab title="Personal & Condition">
+    | Field | Notes |
+    |---|---|
+    | Rating | Star rating |
+    | Read (icon) | Read/Unread status icon |
+    | Track progress | Detailed reading progress (page/percentage) |
+    | Read start date | |
+    | Read end date | |
+    | Personal notes | |
+    | Signed | Whether the copy is signed |
+    | Condition (book) | Physical condition of the book |
+    | Condition (dust cover) | Physical condition of the dust jacket |
+    | Location | Physical location on your shelf |
+    | Tags | User-assigned tags |
+    | Price listed / Price paid | |
+    | Date acquired | |
+    | Date added | |
+    | Date last updated | |
+  </Tab>
+</Tabs>
+
+<Warning>
+  Author and Bookshelf are always visible and cannot be hidden — they are required by the grouping and filtering system.
+</Warning>

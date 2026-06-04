@@ -1,0 +1,159 @@
+---
+title: "Contributing Code and Issues to NeverTooManyBooks"
+sidebarTitle: "Contributing"
+description: "Learn how to report bugs, request features, and submit pull requests to NeverTooManyBooks while following its GPL-3.0 license and Java code style rules."
+---
+
+NeverTooManyBooks is a free, open-source Android app licensed under the **GNU General Public License v3.0 (GPL-3.0)**. All contributions — whether bug reports, feature suggestions, or code changes — are genuinely welcome. Because the project is GPL-3.0, any code you contribute must be compatible with that license: it must be something you have the right to share under the same copyleft terms. The preferred channels for all communication are GitHub Issues and GitHub Pull Requests; there is no mailing list or forum. Translations are handled separately through Weblate — please do **not** open PRs for translation files.
+
+<CardGroup cols={2}>
+  <Card
+    title="GitHub Issues"
+    icon="circle-exclamation"
+    href="https://github.com/tfonteyn/NeverTooManyBooks/issues"
+  >
+    Report bugs, request features, or start a discussion before writing code.
+  </Card>
+  <Card
+    title="GitHub Releases"
+    icon="tag"
+    href="https://github.com/tfonteyn/NeverTooManyBooks/releases"
+  >
+    Browse the full release history and download any past or current APK.
+  </Card>
+</CardGroup>
+
+<Note>
+  The maintainer is best reached by logging a GitHub Issue. This keeps all
+  conversation in one place and makes it easy to track progress — private
+  emails or social-media messages may go unanswered.
+</Note>
+
+## Reporting Bugs
+
+A clear, reproducible bug report is one of the most valuable contributions you can make. Before opening a new issue, search existing ones to avoid duplicates.
+
+When filing a bug report, always include:
+
+- **Android version** — e.g. Android 14 (API 34)
+- **App version** — found in the app's **About** screen (e.g. 7.16.1)
+- **Steps to reproduce** — numbered, specific, and minimal
+- **Expected behaviour** and **actual behaviour**
+- Any relevant error messages or screenshots
+
+<Accordion title="Where do I find the app version?">
+  Open the app, tap the three-dot overflow menu, choose **About**. The version
+  number (e.g. `7.16.1`) is displayed there. Include this exact string in your
+  bug report so the maintainer can correlate it with the release changelog.
+</Accordion>
+
+## Requesting Features
+
+Before writing any code for a new feature, **log a GitHub Issue first** to discuss the idea. This avoids wasted effort if the feature conflicts with the project's direction, has already been considered, or needs design input. The maintainer may suggest an alternative approach or point you to related existing work.
+
+## Code Style
+
+The project is written in **Java 11** with Android desugaring enabled. The style is enforced by Checkstyle — the configuration lives in `checkstyle.xml` at the repository root and targets the [Android Open Source code-style guide](https://source.android.com/setup/contribute/code-style).
+
+<Tip>
+  Run `./gradlew checkstyle` before pushing any commits. CI will catch
+  violations, but fixing them locally first keeps the review cycle short.
+</Tip>
+
+Key rules enforced by the project style:
+
+<Tabs>
+  <Tab title="Formatting">
+    - Maximum line length: **100 characters**
+    - No tab characters — spaces only
+    - Files must end with a newline
+    - Encoding: **UTF-8** throughout
+  </Tab>
+  <Tab title="Annotations">
+    All public method parameters and return types must be annotated with either
+    `@NonNull` or `@Nullable`. Thread-safety is declared explicitly using the
+    AndroidX concurrency annotations:
+
+    ```java
+    @WorkerThread
+    public @NonNull List<Book> fetchBooks(@NonNull String query) { ... }
+
+    @MainThread
+    public void updateUi(@Nullable Book book) { ... }
+
+    @AnyThread
+    public @NonNull String buildCacheKey(@NonNull String isbn) { ... }
+    ```
+  </Tab>
+  <Tab title="Comment Tags">
+    Inline comment tags are used throughout the codebase to flag work items.
+    Each tag is **always followed by a colon**:
+
+    | Tag | Meaning |
+    |-----|---------|
+    | `URGENT:` | Not a show-stopper, but urgently needs attention |
+    | `TEST:` | Work done; minimal testing passed — full testing still needed |
+    | `RELEASE:` | Must be verified before any public release |
+    | `NEWTHINGS:` | Notes on how to add new functionality |
+    | `FIXME:` | Workaround in place but should be properly fixed |
+    | `TODO:` | Needs doing when time allows |
+    | `ENHANCE:` | Improvement possible with more time |
+  </Tab>
+</Tabs>
+
+## Pull Request Workflow
+
+<Steps>
+  <Step title="Fork the repository">
+    Go to [github.com/tfonteyn/NeverTooManyBooks](https://github.com/tfonteyn/NeverTooManyBooks)
+    and click **Fork**. Clone your fork locally.
+
+    ```bash
+    git clone https://github.com/<your-username>/NeverTooManyBooks.git
+    cd NeverTooManyBooks
+    ```
+  </Step>
+  <Step title="Create a feature branch">
+    Always branch off `main`. Use a short, descriptive name.
+
+    ```bash
+    git checkout -b fix/isbn-scan-crash
+    ```
+  </Step>
+  <Step title="Make changes, run Checkstyle and tests">
+    Edit the code, then verify style and tests pass locally before committing.
+
+    ```bash
+    ./gradlew checkstyle
+    ./gradlew test
+    ```
+
+    Ensure all public method parameters and return types carry `@NonNull` or
+    `@Nullable`, and that thread annotations (`@WorkerThread`, `@MainThread`,
+    `@AnyThread`) are applied wherever threads are relevant.
+  </Step>
+  <Step title="Open a Pull Request against `main`">
+    Push your branch to your fork, then open a PR on GitHub targeting the
+    `main` branch of the upstream repository. In the PR description:
+
+    - Reference any related GitHub Issue (e.g. `Closes #123`)
+    - Briefly describe what changed and why
+    - Note any areas you'd like the reviewer to pay special attention to
+  </Step>
+  <Step title="Respond to review comments">
+    The maintainer may request changes. Push additional commits to the same
+    branch — do not open a new PR. Once the review is satisfied, the PR will
+    be merged.
+  </Step>
+</Steps>
+
+<Warning>
+  **Do not submit pull requests for translation files.** Translations are
+  managed exclusively through [Weblate](https://hosted.weblate.org/engage/nevertoomanybooks/),
+  which handles synchronisation with the repository automatically. Translation
+  PRs will be closed without merging.
+</Warning>
+
+## License Compatibility
+
+NeverTooManyBooks is released under the **GNU General Public License v3.0**. By submitting a pull request, you confirm that your contribution is compatible with GPL-3.0 and that you have the right to contribute it. Do not introduce dependencies that carry licenses incompatible with GPL-3.0 (e.g. proprietary or non-commercial-only licenses).

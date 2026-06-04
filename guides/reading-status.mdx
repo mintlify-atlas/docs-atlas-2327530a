@@ -1,0 +1,99 @@
+---
+title: "Tracking Reading Status and Progress in Your Library"
+sidebarTitle: "Reading Status"
+description: "Set a book to Unread, Currently Reading, or Read; log your current page or percentage; and let the app record start and finish dates automatically."
+---
+
+NeverTooManyBooks tracks not just what books you own but where you are with each one. Every book carries a reading status — **Unread**, **Currently Reading**, or **Read** — and when you are actively working through a book you can record your exact progress either as a page number (`page 147 of 432`) or as a percentage complete. Start and finish dates are logged automatically when you change status, but you can also set them manually. The date you finished reading feeds directly into the booklist grouping system, so you can arrange your shelves chronologically by the year you read each book.
+
+## Reading Status Values
+
+| Status | Meaning |
+|---|---|
+| **Unread** | You own the book but have not started it. The `read` flag is `false` and progress is 0 %. |
+| **Currently Reading** | You are actively reading the book. The `read` flag is `false` but a reading-progress value (page or percentage) is stored. |
+| **Read** | You have finished the book. The `read` flag is `true` and progress is 100 %. |
+
+Internally the `ReadingProgress` class encodes progress as either a percentage integer (0–100) or a `currentPage / totalPages` pair, stored as a JSON string in the database column `read_progress`. A value of 100 % is equivalent to the **Read** state; 0 % with no date started means **Unread**.
+
+## Marking a Book as Read
+
+<Steps>
+  <Step title="Open the book details">
+    Tap the book in the list to open its details screen.
+  </Step>
+  <Step title="Locate the reading status chip">
+    The current reading status is shown as a chip or button near the top of the details screen. It displays **Unread**, **Reading**, or **Read** with a corresponding icon.
+  </Step>
+  <Step title="Tap the status chip">
+    Tap the chip to cycle through the available states, or swipe it to jump directly to **Read**. A long-press may reveal additional options depending on your device.
+  </Step>
+  <Step title="Date finished is recorded">
+    When you set the status to **Read**, today's date is automatically written to the **Date Finished** field if it is not already set.
+  </Step>
+  <Step title="Confirm (if prompted)">
+    If you are moving from **Currently Reading** to **Read** and had a progress value recorded, the app updates progress to 100 % automatically.
+  </Step>
+</Steps>
+
+<Note>
+  The **Date Finished** (`read_end`) field is used by booklist styles to group books by **Year Read**. If you set the date manually (e.g. for books you read before installing the app), make sure to enter the correct year so grouping works as expected. You can always edit the date in **Edit Book → Notes**.
+</Note>
+
+## Recording Reading Progress
+
+When a book's status is **Currently Reading**, you can log how far through it you are.
+
+<Steps>
+  <Step title="Open the book for editing">
+    Tap the book → tap the **pencil** edit icon → go to the **Notes** tab.
+  </Step>
+  <Step title="Set the progress mode">
+    Choose whether to track progress by **page number** or by **percentage**. Toggle between the two modes using the switch next to the progress field.
+  </Step>
+  <Step title="Enter your progress">
+    - **Page mode:** enter your current page and the total page count (e.g. `147` of `432`). The percentage is calculated automatically.
+    - **Percentage mode:** enter a value from 0 to 100.
+  </Step>
+  <Step title="Save">
+    Tap **✓**. The progress is saved to the `read_progress` database column as a compact JSON value, for example `{"cp":147,"tp":432}` or `{"pct":34}`.
+  </Step>
+</Steps>
+
+The `ReadingProgress` class that handles this data supports three constructors:
+
+```java
+// Percentage-based progress
+new ReadingProgress(34);               // 34 %
+
+// Page-based progress
+new ReadingProgress(147, 432);         // page 147 of 432
+
+// Shortcut for a finished or not-started book
+ReadingProgress.finished(true);        // 100 %
+ReadingProgress.finished(false);       // 0 %
+```
+
+## Date Started and Date Finished
+
+Both dates are stored in the `read_start` and `read_end` database columns.
+
+- **Date Started** is set to today's date automatically when you change the status to **Currently Reading** (if it is not already filled in).
+- **Date Finished** is set to today's date automatically when you change the status to **Read**.
+- Both dates can be edited manually in **Edit Book → Notes** using the date picker, so you can backfill history for books read before you installed the app.
+
+## Filtering and Grouping by Reading Status
+
+Reading status integrates with booklist styles in two ways:
+
+**Grouping** — In any style, add a **Read** or **Reading Progress** group level. Your books will be sectioned under headers like "Read", "Reading", and "Unread".
+
+**Filtering** — Each bookshelf supports per-shelf filters. Add a **Read Status** filter to a shelf to show only unread books, only books currently being read, or only finished books.
+
+<Tip>
+  Create a dedicated bookshelf called "Reading Queue" and add a filter that shows only **Unread** books. Then apply a style that sorts by **Date Added** descending so your most recently acquired books float to the top. Switch to this shelf whenever you need something new to read.
+</Tip>
+
+## Editing Status in Bulk
+
+There is no bulk-edit screen for reading status, but you can use the local search or filter system to isolate a set of books and then update them individually from the details screen. For large imports (e.g. migrating from another app via CSV), the CSV import format supports the `read`, `read_start`, and `read_end` columns so you can set status for many books at once.

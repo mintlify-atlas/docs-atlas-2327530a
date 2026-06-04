@@ -1,0 +1,192 @@
+---
+title: "Supported Search Engines: Full Site Reference Guide"
+sidebarTitle: "Search Engines"
+description: "A full reference of every data source built into NTMB, how to enable and prioritise them, and per-site notes on authentication, language coverage, and known quirks."
+---
+
+NeverTooManyBooks ships with connectors for more than eighteen external book data sources ranging from national library catalogues to regional comics shops. Each connector is an independent search engine that can be switched on or off, given a custom priority position, and further tuned through its own settings page. This reference documents every engine, what it covers, and anything special you need to know to get the best results from it.
+
+## Managing Site Settings
+
+To reach the site list, open **Settings → Search → Websites**. From there you can:
+
+- **Toggle a site on or off** using the switch next to each row. Disabled sites are never queried.
+- **Reorder sites by dragging** to set search priority. Sites higher in the list are queried first and their field values take precedence in the metadata merge (first non-empty value wins).
+- **Open a site's own settings page** by tapping the menu button (⋮) on any row. Site-specific settings include changing the default URL and, for sites that require a login, entering credentials.
+
+<Tip>
+  Start with a small set of high-quality sites for your collection's main language, then add specialist catalogues (ISFDB, Bedetheque, StripInfo) only if you collect those genres. Fewer active sites means faster searches.
+</Tip>
+
+## Worldwide / General Catalogues
+
+<Accordion title="Google Books">
+  **URL:** books.google.com  
+  **Language:** English and more  
+  **Type:** Catalogue  
+
+  Google Books is the broadest general-purpose source and a reliable fallback for most modern ISBNs. It supports ISBN search, external ID search (Google Books volume ID), and free-text search.
+</Accordion>
+
+<Accordion title="OpenLibrary">
+  **URL:** openlibrary.org  
+  **Language:** English and more  
+  **Type:** Catalogue  
+
+  The Internet Archive's Open Library holds records for millions of editions. It is particularly strong for older and out-of-print titles. Supports ISBN, external ID (Open Library edition key), and text searches.
+</Accordion>
+
+<Accordion title="Goodreads">
+  **URL:** goodreads.com  
+  **Language:** English and more  
+  **Type:** Catalogue  
+
+  Goodreads provides broad coverage of English-language titles plus strong community-contributed metadata such as series information and genre tags.
+</Accordion>
+
+<Accordion title="Amazon">
+  **Domains:** .com, .co.uk, .fr, .de, .nl, .com.be, .es  
+  **Language:** Worldwide  
+  **Type:** Shop  
+
+  Amazon stores are configured individually — you can enable the domains relevant to your region and disable the rest. Each domain is a separate engine entry in the site list.
+
+  <Warning>
+    Amazon is **increasingly blocking automated access**. If you see Amazon-specific errors (timeouts, empty results, or HTTP 503 responses), disable the affected Amazon domain in **Settings → Search → Websites** and report the issue on the GitHub tracker. This is an ongoing external constraint and not a bug in the app.
+  </Warning>
+</Accordion>
+
+<Accordion title="ISFDB">
+  **URL:** isfdb.org  
+  **Language:** English and more  
+  **Type:** Catalogue — Fantasy and Science Fiction  
+
+  The Internet Speculative Fiction Database is the authoritative source for SF/F/H titles. It has deep coverage of short fiction, anthologies, and publication history that no general catalogue matches. Supports ISBN, external ID (ISFDB title and publication IDs), and text searches.
+</Accordion>
+
+<Accordion title="Wikidata">
+  **URL:** wikidata.org  
+  **Language:** Multilingual  
+  **Type:** Catalogue  
+
+  Wikidata provides structured, linked data for books and authors. Useful as a supplementary source for author details and identifier cross-references.
+</Accordion>
+
+## European Comics Catalogues and Shops
+
+<Accordion title="Bedetheque">
+  **URL:** bedetheque.com  
+  **Language:** French and more  
+  **Type:** Catalogue — European Comics  
+
+  The most comprehensive French-language comics database, covering BD (bande dessinée) albums, series, authors, and illustrators. Bedetheque requires you to **create a free account** on the site. Enter your username and password in **Settings → Search → Websites → Bedetheque → ⋮ → Settings**.
+</Accordion>
+
+<Accordion title="StripInfo">
+  **URL:** stripinfo.be  
+  **Language:** Dutch and more  
+  **Type:** Catalogue — European Comics  
+
+  Belgian comics catalogue (strips) with strong Dutch and French-language holdings. Supports ISBN, external ID, and text search.
+</Accordion>
+
+<Accordion title="StripWeb">
+  **URL:** stripweb.be  
+  **Language:** Dutch / French  
+  **Type:** Shop — European Comics  
+
+  Belgian comics shop. Useful for finding current pricing and availability alongside metadata.
+</Accordion>
+
+<Accordion title="LastDodo">
+  **URL:** lastdodo.nl  
+  **Language:** Dutch and more  
+  **Type:** Catalogue — European Comics  
+
+  Dutch platform specialising in collectibles including comics. Good source for Dutch-language strip metadata.
+</Accordion>
+
+## Language-Specific Sources
+
+<Accordion title="BnF.fr — Bibliothèque nationale de France">
+  **URL:** bnf.fr  
+  **Language:** French  
+  **Type:** National Library Catalogue  
+
+  The French National Library catalogue. Authoritative for French-language publications. Supports ISBN and text search.
+</Accordion>
+
+<Accordion title="DNB — Deutsche Nationalbibliothek">
+  **URL:** dnb.de / katalog.dnb.de  
+  **Language:** German  
+  **Type:** National Library Catalogue  
+
+  Germany's National Library. Excellent coverage of German-language titles. When enabled in the site settings, DNB can return **high-resolution cover images** via the MVB portal, which can significantly improve cover quality compared to other sources.
+</Accordion>
+
+<Accordion title="KB.NL — Koninklijke Bibliotheek">
+  **URL:** kb.nl  
+  **Language:** Dutch and more  
+  **Type:** National Library Catalogue  
+
+  The Royal Library of the Netherlands. Strong coverage of Dutch-language and multilingual titles.
+</Accordion>
+
+<Accordion title="BOL.com">
+  **URL:** bol.com  
+  **Language:** Dutch and more  
+  **Type:** Shop  
+
+  The main Dutch-language online retailer. Useful for cover images and metadata on recent Dutch and Flemish publications.
+</Accordion>
+
+<Accordion title="Bertrand.pt">
+  **URL:** bertrand.pt  
+  **Language:** Portuguese and more  
+  **Type:** Shop  
+
+  Portugal's major bookshop chain. Good source for Portuguese-language metadata and cover images.
+</Accordion>
+
+<Accordion title="Biblionet.gr">
+  **URL:** biblionet.gr  
+  **Language:** Greek  
+  **Type:** Catalogue  
+
+  The main Greek book database. Covers Greek-language titles from Greek publishers.
+</Accordion>
+
+<Accordion title="Bibliotece.pl">
+  **URL:** bibliotece.pl  
+  **Language:** Polish  
+  **Type:** Catalogue  
+
+  Polish library catalogue with broad coverage of Polish-language books.
+</Accordion>
+
+<Accordion title="databazeknih.cz">
+  **URL:** databazeknih.cz  
+  **Language:** Czech and more  
+  **Type:** Catalogue  
+
+  Czech and Slovak book database. Community-maintained catalogue with good coverage of Central European titles.
+</Accordion>
+
+<Accordion title="Douban.com">
+  **URL:** douban.com  
+  **Language:** Chinese  
+  **Type:** Catalogue  
+
+  The leading Chinese book catalogue. Essential for Chinese-language titles where no other engine provides meaningful coverage.
+</Accordion>
+
+## Engine Capabilities Reference
+
+Each engine implements one or more search interfaces. The table below shows which search modes each category of engine typically supports.
+
+| Search Mode | How it's triggered | Typical engine support |
+|---|---|---|
+| **By ISBN / Barcode** | Scan or type a numeric ISBN | Nearly all engines |
+| **By External ID** | Site-specific numeric or string ID | Selected engines (Goodreads ID, ISFDB ID, DNB ID, etc.) |
+| **By Text** | Title, author, or keyword | Most general catalogues and shops |
+| **Cover by Edition** | Cover Browser alternative editions | Engines that implement the `CoverByEdition` interface |

@@ -1,0 +1,206 @@
+---
+title: "Backup Archive Format: Structure and Record Types"
+sidebarTitle: Backup Format
+description: A developer reference for the .ntmb ZIP archive layout, RecordType entries, supported encodings, and the JSON book record schema used in NeverTooManyBooks backups.
+---
+
+NeverTooManyBooks stores full backups in a ZIP-based archive format (`.ntmb`) that is designed to be self-describing and forward-compatible. The archive bundles book data, cover images, app preferences, and booklist styles into a structured set of named entries. Understanding this layout is essential if you want to build external tooling that can read, write, or inspect NTMB backup files, or if you want to extend the backup system itself. This page covers the archive structure, the `RecordType` enum, the available encoding formats, and the JSON schema used for book records.
+
+## Archive Structure
+
+The default backup file is a standard ZIP archive with the extension `.ntmb`. Every entry inside the archive is named after its `RecordType` (see below). The top-level layout looks like this:
+
+```
+my-backup.ntmb  (ZIP)
+├── info              ← Archive metadata (version, dates, record counts)
+├── books.json        ← Main book collection (JSON encoding)
+├── styles.json       ← User-defined booklist styles
+├── preferences.xml   ← App preferences (key=value pairs)
+├── bookshelves.json  ← Bookshelf definitions
+├── tags.json         ← Tag and tag-mapping definitions
+├── identifiers.json  ← Identifier type definitions
+├── deletedbooks.json ← UUIDs of books deleted since last backup
+├── covers/           ← Cover images (one file per book per slot)
+│   ├── <uuid>_0.jpg
+│   └── <uuid>_1.jpg
+└── certificates      ← SSL certificates (Calibre only, optional)
+```
+
+The `info` entry is always written first and read first. All other entries can appear in any order — the reader identifies each entry by checking its name against the `RecordType` prefix table.
+
+<Note>
+The `info` entry carries a `version` integer. Readers check this version before processing any other entry. If the version is higher than the reader supports, the import is rejected with a clear error rather than silently producing corrupt data. Always increment the version when changing the archive schema in a way that is not backward-compatible.
+</Note>
+
+## RecordType Enum
+
+`RecordType` (in `com.hardbacknutter.nevertoomanybooks.io`) is the authoritative list of archive entry types. Each constant defines the fixed name used when **writing** and the prefix used when **detecting** entries during reading (detection is case-insensitive):
+
+| Enum Constant | Archive Name | Description |
+|---|---|---|
+| `MetaData` | `info` | Archive metadata — version, creation timestamp, record counts. Exactly one per archive. |
+| `Books` | `books` | The main book collection. Includes embedded author, publisher, and series data. Exactly one per archive. |
+| `Covers` | _(per-file)_ | Individual cover image files. Multiple entries per archive. Named by book UUID and cover index. |
+| `Styles` | `styles` | User-defined booklist style definitions. Exactly one per archive. |
+| `Preferences` | `preferences` | Application preferences (all key=value pairs). Exactly one per archive. |
+| `Bookshelves` | `bookshelves` | Bookshelf definitions. **Must precede `Books`** if both are present. |
+| `Tags` | `tags` | Tag definitions and tag-mapping rules. |
+| `Identifiers` | `identifiers` | Identifier type definitions (e.g. ISBN, ASIN, etc.). |
+| `Certificates` | `certificates` | Named SSL certificates for Calibre Content Server connections. |
+| `CalibreLibraries` | `calibrelibraries` | Calibre library metadata. |
+| `CalibreCustomFields` | `calibrecustomfields` | Calibre custom field definitions. |
+| `DeletedBooks` | `deletedbooks` | UUID + deletion-timestamp pairs for books deleted from the local library. |
+| `Database` | `database` | Raw SQLite database file. Used only with the `SqLiteDb` encoding. |
+| `AutoDetect` | `data` | Container element used during import to auto-detect nested record types. |
+
+### Implicit Dependencies
+
+When a reader or writer is configured to include `Books`, the framework automatically adds `Bookshelves`, `CalibreLibraries`, `Identifiers`, `Tags`, and `DeletedBooks` to the working set via `RecordType.addRelatedTypes()`. Similarly, `Preferences` pulls in `CalibreCustomFields`, `Identifiers`, and `Tags`. You do not need to request these explicitly.
+
+```java
+// The framework resolves these automatically:
+Set<RecordType> resolved = RecordType.addRelatedTypes(Set.of(RecordType.Books));
+// resolved now contains: Books, Bookshelves, CalibreLibraries,
+//                        Identifiers, Tags, DeletedBooks
+```
+
+## Encoding Formats
+
+### Writer Encodings (ArchiveWriterEncoding)
+
+The `ArchiveWriterEncoding` enum controls the format of the output file:
+
+<CardGroup cols={3}>
+  <Card title="Zip" icon="file-zipper">
+    **Default.** Full backup in a ZIP archive. Contains all record types as JSON/XML files plus cover images. Extension: `.ntmb` (or `.zip`).
+  </Card>
+  <Card title="Json" icon="brackets-curly">
+    All book data in a single JSON file. No cover images. Full export/import support. Extension: `.json`.
+  </Card>
+  <Card title="SqLiteDb" icon="database">
+    A raw copy of the SQLite database file. Useful for developer inspection. Extension: `.db`.
+  </Card>
+</CardGroup>
+
+### Reader Encodings (ArchiveReaderEncoding)
+
+The `ArchiveReaderEncoding` enum covers all formats the app can import. The reader auto-detects the format by inspecting the file's **magic bytes** before falling back to the file extension:
+
+| Format | Detection | Notes |
+|---|---|---|
+| `Zip` | Magic bytes `PK\x03\x04` at offset 0 | Standard ZIP; primary NTMB backup format |
+| `Tar` | `ustar` at offset 0x101 | Legacy BookCatalogue archive format |
+| `Csv` | Starts with `"_id",` | Books only; compatible with BookCatalogue, legacy NTMB 1.0–3.x, and Goodreads exports |
+| `Json` | Starts with `{"` | Single-file JSON (primarily for developer/test use) |
+| `SqLiteDb` | `SQLite format 3` at offset 0 | Detected but import not fully supported in UI |
+
+<Tip>
+If you are building an external tool that needs to generate files NTMB can import, **CSV is the simplest format to produce**. A valid CSV starts with a header row beginning with `"_id",` and each subsequent row is a book. JSON ZIP is the richest format but requires constructing a complete archive with correct `info` metadata.
+</Tip>
+
+## The JSON Books Format
+
+When writing a ZIP or JSON backup, book records are serialised as a JSON array under the `books` key. The structure below shows the most common fields; not all fields are required on import:
+
+```json
+{
+  "version": 1,
+  "books": [
+    {
+      "_id": 42,
+      "book_uuid": "3f8a1b2c-4d5e-6f70-8192-a3b4c5d6e7f8",
+      "title": "The Name of the Wind",
+      "title_original_lang": "",
+      "author": [
+        {
+          "given_names": "Patrick",
+          "family_name": "Rothfuss",
+          "complete_name": "",
+          "type": 1
+        }
+      ],
+      "series": [
+        {
+          "title": "The Kingkiller Chronicle",
+          "num": "1"
+        }
+      ],
+      "publisher": [
+        {
+          "name": "DAW Books"
+        }
+      ],
+      "isbn": "9780756404741",
+      "date_published": "2007-03-27",
+      "language": "eng",
+      "format": "Paperback",
+      "pages": 662,
+      "description": "A young man grows up to be a legendary wizard...",
+      "rating": 4.5,
+      "read": false,
+      "date_added": "2024-01-15T10:30:00Z",
+      "update_date": "2024-06-01T08:00:00Z",
+      "cover": ["3f8a1b2c-4d5e-6f70-8192-a3b4c5d6e7f8_0.jpg"]
+    }
+  ]
+}
+```
+
+Key schema notes:
+
+- **`_id`**: The local database row ID. Ignored on import into a fresh database; the app assigns new IDs.
+- **`book_uuid`**: A stable UUID that persists across devices and reinstalls. This is used to match cover image files (`<uuid>_0.jpg` = front cover, `<uuid>_1.jpg` = back cover).
+- **`author`**: An array of author objects. Each has `given_names`, `family_name`, and `type` (an integer bitmask of `AuthorRole` values, e.g. 1 = Author, 2 = Translator).
+- **`series`**: An array of series objects with `title` and `num` (the position within the series, stored as a string to support values like `"1.5"`).
+- **`date_published`**, **`date_added`**, **`update_date`**: ISO 8601 strings. `update_date` is used for incremental sync (`DataReader.Updates.OnlyNewer`).
+- **`cover`**: Array of filenames (not paths) for cover images stored in the `covers/` directory of the ZIP.
+
+## Archive Metadata (the `info` Entry)
+
+The `info` entry is a flat JSON object written at the top of every ZIP archive:
+
+```json
+{
+  "version": 2,
+  "app_version_code": 63,
+  "app_version_name": "5.4.0",
+  "created_date": "2024-11-20T14:22:10Z",
+  "book_count": 312,
+  "cover_count": 289,
+  "has_styles": true,
+  "has_preferences": true
+}
+```
+
+Readers use `version` to gate which fields they expect to find in the archive. `app_version_code` and `app_version_name` are recorded for diagnostic purposes and are not used to block import.
+
+## Reading an Archive: Detection Flow
+
+The `ArchiveReaderEncoding.getEncoding(Context, Uri)` method encapsulates the full detection logic:
+
+<Steps>
+  <Step title="Open the input stream">
+    The first 512 bytes (`0x200`) of the file are read to inspect the magic bytes.
+  </Step>
+  <Step title="Check magic bytes in order">
+    The reader checks for ZIP (`PK\x03\x04`), TAR (`ustar` at 0x101), SQLite (`SQLite format 3`), CSV (starts with `"_id",`), and JSON (starts with `{"`). The first match wins and returns the corresponding `ArchiveReaderEncoding`.
+  </Step>
+  <Step title="Fall back to extension">
+    If no magic-byte match is found (common for CSV and JSON files whose first bytes vary), the Uri's display name is checked against `.csv` and `.json` patterns (case-insensitive, with support for numbered duplicates like `backup.json (1)`).
+  </Step>
+  <Step title="Create the reader">
+    Once the encoding is determined, `ArchiveReaderEncoding.createReader()` instantiates the correct reader class (`ZipArchiveReader`, `CsvArchiveReader`, etc.), calls `validate()` on it, and returns it.
+  </Step>
+</Steps>
+
+## CSV Format Reference
+
+For external tooling, the CSV format is the most accessible. Books are exported with a header row followed by one row per book. The header begins with `"_id",` — this is what the magic-byte detector matches. Column names map directly to `DBKey` constants. Required columns for a minimal import are `_id`, `book_uuid`, `title`, and at least one author field.
+
+<Tip>
+When importing a CSV generated by an external tool, the app will assign new `_id` values and generate new UUIDs if `book_uuid` is absent. Author, series, and publisher data can be supplied as pipe-separated strings in the relevant columns — check a sample NTMB export for the exact column names and delimiter conventions before writing your generator.
+</Tip>
+
+<Warning>
+The CSV format does not support cover images. If you need covers in your import, use the ZIP format and include images in the `covers/` directory named `<uuid>_0.jpg`. A well-formed `info` entry is required for ZIP imports; omitting it causes the reader to reject the archive.
+</Warning>

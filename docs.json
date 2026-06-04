@@ -1,72 +1,100 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mintlify Starter Kit",
+  "name": "NeverTooManyBooks",
+  "theme": "almond",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#5c5c5c",
+    "light": "#2e2e2e",
+    "dark": "#c1c1c1"
   },
-  "favicon": "/favicon.svg",
-  "navigation": {
-    "pages": [
-      {
-        "group": "Getting Started",
-        "pages": [
-          "index",
-          "quickstart"
-        ]
-      }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
+  "favicon": "https://media.brand.dev/50b82061-c5bf-497d-9f86-b56875ac86ad.jpg",
   "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
     "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.mintlify.com"
+      "type": "github",
+      "href": "https://github.com/tfonteyn/NeverTooManyBooks"
     }
-  },
-  "contextual": {
-    "options": [
-      "copy",
-      "view",
-      "chatgpt",
-      "claude",
-      "perplexity",
-      "mcp",
-      "cursor",
-      "vscode"
-    ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/tfonteyn/NeverTooManyBooks"
     }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "User Guide",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Managing Your Library",
+            "pages": [
+              "guides/adding-books",
+              "guides/bookshelves",
+              "guides/editing-books",
+              "guides/covers",
+              "guides/reading-status"
+            ]
+          },
+          {
+            "group": "Search & Data Sources",
+            "pages": [
+              "guides/search-overview",
+              "guides/search-engines",
+              "guides/calibre-sync"
+            ]
+          },
+          {
+            "group": "Import & Export",
+            "pages": [
+              "guides/backup-restore",
+              "guides/import-export"
+            ]
+          },
+          {
+            "group": "Settings & Customization",
+            "pages": [
+              "guides/settings",
+              "guides/styles-and-grouping",
+              "guides/permissions"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Developer Reference",
+        "groups": [
+          {
+            "group": "Architecture",
+            "pages": [
+              "dev/architecture",
+              "dev/building",
+              "dev/data-model"
+            ]
+          },
+          {
+            "group": "Extending the App",
+            "pages": [
+              "dev/search-engine-api",
+              "dev/sync-api",
+              "dev/backup-format"
+            ]
+          },
+          {
+            "group": "Contributing",
+            "pages": [
+              "dev/contributing",
+              "dev/translations"
+            ]
+          }
+        ]
+      }
+    ]
   }
 }

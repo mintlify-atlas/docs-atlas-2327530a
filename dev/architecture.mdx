@@ -1,0 +1,137 @@
+---
+title: "App Architecture: Layers, Modules, and Patterns"
+sidebarTitle: "Architecture"
+description: "A technical overview of NeverTooManyBooks' MVVM structure, Gradle modules, layered design, and the ServiceLocator pattern that wires the app together."
+---
+
+NeverTooManyBooks is a native Android application written in Java 11 with Android desugaring enabled. It follows a Model–View–ViewModel (MVVM) architecture built on Android Architecture Components — LiveData, ViewModel, and direct SQLite access via a custom `DBHelper`. Rather than adopting a third-party dependency injection framework, the project uses a hand-rolled `ServiceLocator` singleton that lazily instantiates every DAO and shared service the app needs, keeping startup fast and the dependency graph explicit and auditable.
+
+## Language and Tooling
+
+The codebase targets Java 11 source and target compatibility, compiled through the Gradle Java toolchain. Android's core library desugaring (`coreLibraryDesugaringEnabled = true`) back-ports modern Java APIs — such as `java.time` — to older Android versions. Kotlin is also on the classpath (used primarily by some Gradle build logic and toolchain configuration), but all production application code is Java. The build system is Gradle with the Android Gradle Plugin; Version Catalogs (`libs.versions.toml`) manage all dependency versions centrally.
+
+<Note>
+  There is no Dagger, Hilt, Koin, or any other DI framework in use. All
+  service and DAO access flows through the hand-written `ServiceLocator`
+  singleton. This is a deliberate choice — it keeps the dependency graph
+  visible in one place and eliminates annotation-processing overhead at build
+  time.
+</Note>
+
+## Module Structure
+
+The project is split into several Gradle modules declared in `settings.gradle`. Each library module is a focused, reusable unit:
+
+<CardGroup cols={2}>
+  <Card title=":app" icon="mobile">
+    The main application module. Contains all Activities, Fragments, ViewModels, DAOs, entities, search engines, and the `AndroidManifest.xml`. Everything user-facing lives here.
+  </Card>
+  <Card title=":core" icon="cube">
+    Shared utilities and base classes used by `:app` and library modules. Includes database primitives (`SynchronizedDb`, `Domain`, `TableDefinition`), network helpers, parsers, and storage utilities.
+  </Card>
+  <Card title=":Logger" icon="file-lines">
+    A thin logging abstraction (`LoggerFactory` / `FileLogger`) that decouples the rest of the codebase from any specific logging backend and supports writing log files to device storage.
+  </Card>
+  <Card title=":PrefsLib" icon="sliders">
+    A shared preferences abstraction layer that wraps `SharedPreferences` with typed accessors, used consistently across the app for persisted settings.
+  </Card>
+  <Card title=":LiveDataEvent" icon="bolt">
+    A `LiveData` event wrapper that ensures each event is consumed exactly once — solving the classic "re-delivery on rotation" problem for one-shot UI events.
+  </Card>
+  <Card title=":Insets" icon="table-columns">
+    Helpers for handling Android window insets, keeping edge-to-edge layout logic out of individual Fragment classes.
+  </Card>
+  <Card title=":fastscroller" icon="list">
+    A custom fast-scroller widget used by the main book list `RecyclerView`. Provides the thumb-drag overlay for large collections.
+  </Card>
+  <Card title=":zratingbar" icon="star">
+    A custom `RatingBar` replacement that supports half-star increments (0–5 in 0.5 steps) as used by the book rating field.
+  </Card>
+  <Card title=":repacked-org-json" icon="braces">
+    A repackaged copy of the `org.json` library under a private package namespace, avoiding conflicts with the version bundled in the Android SDK.
+  </Card>
+</CardGroup>
+
+## Architectural Layers
+
+The application is organised into four logical layers:
+
+<CardGroup cols={2}>
+  <Card title="UI Layer" icon="window">
+    **Activities and Fragments.** The app uses a single-Activity-per-screen-area approach with Fragment-based navigation inside each Activity. `BooksOnBookshelf` is the home-screen Fragment; it owns the main book list and drives it via a cursor-backed `RecyclerView` adapter. View Binding (`viewBinding = true`) is used throughout — no `findViewById` calls.
+  </Card>
+  <Card title="ViewModel Layer" icon="sitemap">
+    **Lifecycle-aware state holders.** Each Fragment or Activity hosts a corresponding `ViewModel` (from `androidx.lifecycle`) that survives configuration changes. LiveData properties on the ViewModel expose state to the UI. One-shot events use the `:LiveDataEvent` module wrapper to prevent re-delivery.
+  </Card>
+  <Card title="Data Layer" icon="database">
+    **DAOs and SQLite.** All database access goes through DAO interfaces defined in `com.hardbacknutter.nevertoomanybooks.database.dao`, with implementations in the `.impl` sub-package. The database itself is a raw SQLite database opened and upgraded by `DBHelper` (an `SQLiteOpenHelper` subclass). Access is wrapped by `SynchronizedDb` (from `:core`) to handle concurrent read/write locking. Schema objects — tables, domains, indexes — are declared as static constants in `DBDefinitions`; column names are constants in `DBKey`.
+  </Card>
+  <Card title="Network Layer" icon="globe">
+    **SearchEngine implementations + OkHttp/Jsoup.** Each supported book search website is implemented as a `SearchEngine` in `com.hardbacknutter.nevertoomanybooks.searchengines`. HTTP is handled by a shared `OkHttpClient` instance (with cookie support via `CookieManager` and a persistent `BiscuitStore`). HTML parsing uses Jsoup. JSON responses are handled by the repackaged `org.json` library.
+  </Card>
+</CardGroup>
+
+## ServiceLocator
+
+`ServiceLocator` is the single entry point for all shared services and DAO instances. It is initialised once in `Application.onCreate()` and accessed globally via `ServiceLocator.getInstance()`. Every DAO and service is instantiated lazily and cached as a `@Nullable` field, with `synchronized` blocks guarding the lazy-init pattern:
+
+```java
+@NonNull
+public AuthorDao getAuthorDao() {
+    synchronized (this) {
+        if (authorDao == null) {
+            authorDao = new AuthorDaoImpl(getDb());
+        }
+    }
+    return authorDao;
+}
+```
+
+The services hosted by `ServiceLocator` include:
+
+<Accordion title="DAOs (Data Access Objects)">
+  - `BookDao` — CRUD for book records
+  - `AuthorDao` — author management and merging
+  - `SeriesDao` — series management
+  - `PublisherDao` — publisher management
+  - `BookshelfDao` — bookshelf and filter management
+  - `TocEntryDao` — table-of-contents entries (anthologies)
+  - `TagDao` / `TagMappingDao` — user-defined tags and their mappings
+  - `FtsDao` / `FtsDaoHelper` — full-text search
+  - `IdentifierDao` / `IdentifierValueDao` — external site identifiers (ISBN, ISFDB, etc.)
+  - `LoaneeDao` — lending information
+  - `LocationDao`, `ColorDao`, `FormatDao`, `LanguageDao` — list-of-values DAOs
+  - `StyleDao` / `StylesHelper` — booklist display styles
+  - `CalibreDao` / `CalibreLibraryDao` / `CalibreCustomFieldDao` — Calibre sync
+  - `StripInfoDao`, `BedethequeCacheDao` — strip info and Bedetheque integrations
+  - `DeletedBooksDao` — tombstone tracking for sync
+  - `CoverCacheDao` — cover image metadata cache
+</Accordion>
+
+<Accordion title="Shared Services">
+  - `getDb()` — the main `SynchronizedDb` instance
+  - `getCacheDb()` — the cover-cache `SynchronizedDb`
+  - `getOkHttpClient()` — shared `OkHttpClient` with cookie support
+  - `getCookieManager()` — global `CookieManager` backed by `BiscuitStore`
+  - `getCoverStorage()` — cover image file management
+  - `getAppLocale()` — locale resolution and change notifications
+  - `getLanguages()` — ISO language code cache
+  - `getStyles()` — booklist style cache
+  - `getNotifier()` — system notification management
+  - `getNetworkChecker()` — network availability helper
+</Accordion>
+
+## BooksOnBookshelf: The Home Screen
+
+`BooksOnBookshelf` is the primary `Fragment` and the heart of the application UI. It displays the user's book collection as a grouped, paginated list backed by a database cursor. Key aspects of its design:
+
+- A `ViewModel` (`BooksOnBookshelfViewModel`) manages the active bookshelf, the selected style, and the `Booklist` cursor that drives the adapter.
+- The `Booklist` is built via a Builder pattern that constructs a temporary SQLite query table reflecting the current style's grouping (by author, series, genre, etc.).
+- The main `RecyclerView` uses the `:fastscroller` module for quick navigation through large collections.
+- All navigation to book-detail, search, edit, and settings screens is done via registered `ActivityResultLauncher` contracts, keeping back-stack management clean.
+
+<Tip>
+  When adding a new grouping level or sort order to the book list, the
+  `Booklist` builder and its associated `DBDefinitions` table/domain
+  declarations are the primary places to modify.
+</Tip>

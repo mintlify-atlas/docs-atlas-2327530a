@@ -1,0 +1,123 @@
+---
+title: "Adding and Improving App Translations for NeverTooManyBooks"
+sidebarTitle: "Translations"
+description: "Contribute translations to NeverTooManyBooks via Weblate's browser-based editor — no coding needed, with automatic sync to the repository when complete."
+---
+
+NeverTooManyBooks reaches users around the world, and community translators are the reason the app speaks so many languages. All translations are managed through **Weblate**, a free, open-source platform that lets you contribute directly in a browser-based editor without touching the source code or opening a pull request. When a language's translation reaches the required completion threshold, Weblate automatically submits the changes to the GitHub repository — meaning your work goes live without any manual intervention from the maintainer. If you prefer to work with the raw string files, pull requests containing translation files are also accepted directly on GitHub.
+
+<CardGroup cols={2}>
+  <Card
+    title="Weblate — Translate Online"
+    icon="language"
+    href="https://hosted.weblate.org/engage/nevertoomanybooks/"
+  >
+    Start or improve translations in the browser. No local tooling required.
+  </Card>
+  <Card
+    title="GitHub Issues"
+    icon="circle-exclamation"
+    href="https://github.com/tfonteyn/NeverTooManyBooks/issues"
+  >
+    Request a new language, report a translation issue, or update your credit.
+  </Card>
+</CardGroup>
+
+## Supported Languages
+
+The app ships with the following localisations:
+
+| Language | Region |
+|----------|--------|
+| Chinese (Simplified) | CN |
+| Chinese (Traditional) | TW |
+| Czech | — |
+| Dutch | — |
+| English | — |
+| French | — |
+| Galician | — |
+| German | — |
+| Greek | — |
+| Hungarian | — |
+| Italian | — |
+| Polish | — |
+| Portuguese | — |
+| Portuguese (Brazil) | BR |
+| Russian | — |
+| Slovak | — |
+| Spanish | — |
+| Tamil | — |
+| Turkish | — |
+| Vietnamese | — |
+
+<Note>
+  **Swedish** is included but was produced by machine translation. No human
+  reviewer has verified its quality, so it may contain inaccurate or awkward
+  phrasing. If you are a Swedish speaker and want to improve it, your help
+  on Weblate would be especially welcome.
+</Note>
+
+## How to Add or Improve a Translation
+
+<Steps>
+  <Step title="Go to the Weblate project page">
+    Navigate to [hosted.weblate.org/engage/nevertoomanybooks/](https://hosted.weblate.org/engage/nevertoomanybooks/).
+    You will see the full list of languages and their current completion percentages.
+
+    <Tip>
+      Weblate displays translation progress as a percentage per language — a
+      quick glance shows you exactly which languages need the most attention
+      before you decide where to focus.
+    </Tip>
+  </Step>
+  <Step title="Log in or create a free Weblate account">
+    Click **Register** on the Weblate site. Account creation is free and
+    requires only an email address. You can also sign in with a GitHub account.
+  </Step>
+  <Step title="Choose your language — or request a new one">
+    Select the language you want to work on from the project overview. If your
+    language is not listed, **do not add it directly**; instead, file a
+    [GitHub Issue](https://github.com/tfonteyn/NeverTooManyBooks/issues) to
+    request it. The maintainer will set up the language component on Weblate
+    so it is properly integrated into the build.
+  </Step>
+  <Step title="Start translating strings in the web editor">
+    Weblate's editor shows the English source string alongside the translation
+    field. Untranslated strings are highlighted, and you can filter by status
+    (e.g. "Needs editing", "Untranslated"). Context hints and screenshots are
+    provided where available to help you choose the right wording.
+  </Step>
+  <Step title="Weblate automatically submits your changes">
+    You do not need to open a pull request. Once translations in a component
+    reach the configured threshold, Weblate creates a PR against the GitHub
+    repository on your behalf. The maintainer reviews and merges it, and your
+    translations appear in the next release.
+  </Step>
+</Steps>
+
+## Submitting Translations via Pull Request
+
+If you prefer to work locally with Android string resource files, you can submit a pull request directly to the [GitHub repository](https://github.com/tfonteyn/NeverTooManyBooks). String resources follow standard Android `values-<locale>/strings.xml` conventions. Make sure your file is encoded as **UTF-8** and that you do not alter any English source strings in `values/strings.xml`.
+
+## Translator Credits
+
+The following volunteers are credited in the project for their translation work:
+
+<Accordion title="View all credited translators">
+  | Language | Translator |
+  |----------|-----------|
+  | Greek | [oddfff](https://github.com/oddfff) |
+  | Hungarian | [boldizsar-nagy](https://hosted.weblate.org/user/boldizsar-nagy/) |
+  | Galician | [Vaicheboa O'Loubam](https://hosted.weblate.org/user/vaicheboa/) |
+  | Czech, Slovak, Polish, Russian | [Milan](https://hosted.weblate.org/user/Milan/) |
+  | Tamil | [தமிழ்நேரம்](https://hosted.weblate.org/user/TamilNeram/) |
+  | Portuguese (Brazil) | [Suburbanno](https://github.com/Suburbanno) |
+  | Chinese (Simplified) | [CloneWith](https://github.com/CloneWith), [evoke322](https://github.com/evoke322) |
+  | Vietnamese | [ngocanhtve](https://github.com/ngocanhtve) |
+  | Portuguese | [maverick74](https://github.com/maverick74) |
+
+  All other contributors can be found on the
+  [Weblate contributors page](https://hosted.weblate.org/user/?q=%20contributes:nevertoomanybooks).
+</Accordion>
+
+Translators are currently listed by their GitHub or Weblate alias. If you have contributed translations and would like to be credited under your real name instead, please [log a GitHub Issue](https://github.com/tfonteyn/NeverTooManyBooks/issues) to let the maintainer know.

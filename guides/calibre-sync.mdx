@@ -1,0 +1,128 @@
+---
+title: "Syncing Your Collection with a Calibre Content Server"
+sidebarTitle: "Calibre Sync"
+description: "Step-by-step guide to connecting NTMB to a Calibre Content Server, mapping libraries to bookshelves, running imports and exports, and working with custom fields."
+---
+
+NeverTooManyBooks can talk directly to a **Calibre Content Server (CCS)** — the built-in HTTP server included with the free, open-source [Calibre](https://calibre-ebook.com/) desktop application. Once the connection is configured you can pull books from your Calibre libraries into NTMB, push books back from NTMB to Calibre, and keep metadata like reading progress in sync across both apps. This is not a cloud service: the sync happens over a direct HTTP connection between your Android device and the machine running Calibre, so your data never passes through a third-party server.
+
+## Prerequisites
+
+Before starting setup, make sure you have:
+
+- **Calibre installed** on a desktop or server machine (Windows, macOS, or Linux).
+- The **Content Server enabled** in Calibre — see Step 1 below.
+- Your Android device and the Calibre machine on the **same local network** (or port-forwarding configured for remote access).
+
+<Note>
+  By default the Content Server is only reachable on your local network. If you need to sync while away from home, you must either set up port-forwarding on your router or use a VPN to reach your local network. Exposing the Content Server to the public internet without authentication is not recommended.
+</Note>
+
+## Setup
+
+<Steps>
+  <Step title="Enable the Content Server in Calibre">
+    Open Calibre on your desktop. Go to **Preferences → Sharing → Sharing over the network**. Check **Enable Content Server** and note the port (default **8080**). Click **Apply**.
+
+    Find your machine's local IP address (e.g. `192.168.1.10`) using your OS network settings. The full server URL will be something like `http://192.168.1.10:8080`.
+
+    Optionally, set a username and password in the same Calibre preference pane under **Require username and password**.
+  </Step>
+
+  <Step title="Open Calibre settings in NeverTooManyBooks">
+    On your Android device, open NeverTooManyBooks and go to **Settings → Calibre**. Tap **Enable Calibre sync** to turn the feature on.
+  </Step>
+
+  <Step title="Enter the server URL">
+    Tap **Website address** and type the full URL of your Content Server, for example:
+
+    ```
+    http://192.168.1.10:8080
+    ```
+
+    If your server uses HTTPS with a self-signed certificate, you can import that certificate from a file in the same settings screen so the app trusts it.
+  </Step>
+
+  <Step title="Enter credentials (if required)">
+    If you set a username and password in Calibre, enter them in the **Username** and **Password** fields. NeverTooManyBooks supports both **HTTP Basic** and **HTTP Digest** authentication automatically.
+  </Step>
+
+  <Step title="Test the connection">
+    Tap **Test connection**. The app will attempt to reach the server and retrieve metadata. A green confirmation message means the server is reachable and the credentials are accepted. If the test fails, double-check the URL, ensure the Content Server is running, and verify that no firewall is blocking port 8080.
+  </Step>
+
+  <Step title="Map Calibre libraries to bookshelves">
+    Go to **Settings → Calibre → Library mapping** (or tap the **Library map** button on the Calibre sync screen). Each Calibre library you have will appear in a list. Assign each library to a NeverTooManyBooks bookshelf — books imported from that library will land on the matched bookshelf, and books exported from that bookshelf will go to the paired Calibre library.
+  </Step>
+</Steps>
+
+## Running a Sync
+
+Once set up, you can start a sync from the Calibre sync screen, reachable via the main navigation menu.
+
+<Tabs>
+  <Tab title="Import from Calibre">
+    Tap **Import** to pull books from Calibre into NeverTooManyBooks. You can choose to import:
+
+    - **New books only** — books in Calibre that don't yet exist in NTMB.
+    - **Updated books** — books whose Calibre metadata has changed since the last sync date.
+    - **Both new and updated** — the most complete option.
+
+    The sync date is tracked **per library**, not per individual book. After a successful import, the library's last-sync timestamp is updated so the next run only processes changes.
+  </Tab>
+  <Tab title="Export to Calibre">
+    Tap **Export** to push books from NeverTooManyBooks to Calibre. You can choose to export:
+
+    - **New books only** — books in NTMB that don't exist in Calibre yet.
+    - **Updated books** — books whose NTMB metadata has changed since the last sync.
+    - **Both new and updated**.
+
+    Books are matched by ISBN or by the stored Calibre book ID if one was assigned during a previous import.
+  </Tab>
+  <Tab title="Virtual Libraries">
+    If you have the **NTMB Calibre plugin** installed in Calibre, the app can read and respect Calibre **virtual libraries** (saved searches that act as filtered sub-libraries). Virtual library assignments are imported alongside book data and can be used to further organise books within NTMB bookshelves.
+  </Tab>
+</Tabs>
+
+## Custom Fields
+
+Calibre supports user-defined custom columns (prefixed with `#`). NeverTooManyBooks can read and write these fields when they are configured in **Settings → Calibre → Custom fields**. Common mappings include:
+
+| Calibre custom field | NTMB field |
+|---|---|
+| `#read` | Read status (boolean) |
+| `#read_start` | Date started reading |
+| `#read_end` | Date finished reading |
+| `#read_progress` | Reading progress (percentage or page) |
+| Custom text field | Notes, personal rating, etc. |
+
+Custom fields of type **bool**, **datetime**, **text**, **comments**, and **composite** are supported. Numeric and rating fields may have limited mapping support depending on the Calibre column type.
+
+<Warning>
+  If you edit the **same book** in both NeverTooManyBooks and Calibre between syncs, the sync cannot automatically resolve the conflict. Whichever direction you sync last will overwrite the other app's changes for that book. To avoid data loss, adopt a clear workflow: edit metadata primarily in one app and treat the other as a read-only view, or sync frequently so divergence stays minimal.
+</Warning>
+
+## SSL / HTTPS and Certificates
+
+If your Calibre Content Server is configured with HTTPS (recommended for remote access), you can:
+
+- Use a certificate from a **trusted CA** — the app will accept it automatically.
+- Import a **self-signed certificate** from a `.crt` or `.pem` file via **Settings → Calibre → Import CA certificate**. This adds it to the app's trusted store without affecting system-wide certificate trust.
+
+## Troubleshooting
+
+<Accordion title="Connection test fails immediately">
+  Check that the Calibre Content Server is running (the Calibre taskbar icon should show the server as active) and that the URL includes the correct port. Try opening the URL in a browser on the same device to rule out network issues.
+</Accordion>
+
+<Accordion title="Authentication errors (401 / 403)">
+  Re-enter your credentials in **Settings → Calibre**. If you recently changed the password in Calibre, update it here too. Make sure there are no leading or trailing spaces in the username or password fields.
+</Accordion>
+
+<Accordion title="Books import but have no covers">
+  Calibre serves covers via a separate endpoint. Ensure the Content Server has permission to serve book content (check **Calibre Preferences → Sharing → Sharing over the network → Require username and password for accessing book content**) and that the download folder in NTMB has write permission.
+</Accordion>
+
+<Accordion title="Virtual libraries are not showing">
+  Virtual library support requires the companion **NTMB plugin** to be installed in Calibre. Without it, the app can still import and export books but virtual library data will not be available.
+</Accordion>

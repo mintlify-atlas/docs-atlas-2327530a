@@ -1,0 +1,91 @@
+---
+title: "Android Permissions Used by NeverTooManyBooks"
+sidebarTitle: "Permissions"
+description: "A plain-language explanation of every Android permission NTMB requests, when each one is asked for, and exactly what the app uses it for."
+---
+
+NeverTooManyBooks follows the Android best practice of **requesting permissions only when the relevant feature is first used** — there are no up-front permission walls on launch. If you never scan a barcode, the app never asks for the camera. If you never search for books online, network access is never an issue. This page explains every permission the app may request so you always know exactly what is happening and why.
+
+<Note>
+  NeverTooManyBooks contains **no advertising SDKs, no analytics libraries, and no tracking code** of any kind. Permission access is used solely for the features described below and never to collect data about you or your device.
+</Note>
+
+---
+
+## Permissions Table
+
+| Permission | When it is requested | Why it is needed |
+|---|---|---|
+| `CAMERA` | First time you tap **Scan barcode** | Required by the barcode scanner to access the device camera and read ISBN or EAN barcodes. |
+| `INTERNET` | Always declared; used whenever an online search is triggered | Fetch book metadata (title, author, cover, etc.) from external sources such as Open Library, Google Books, Amazon, and others. |
+| `ACCESS_NETWORK_STATE` | Always declared | Check whether a network connection is available before attempting an online search, to provide a meaningful offline error rather than a timeout. |
+| `ACCESS_WIFI_STATE` | Always declared | Determine whether the active connection is Wi-Fi or mobile data, so the **Allow metered network** setting can be respected. |
+| `ACCESS_LOCAL_NETWORK` | Android 37+ only | Required on API 37+ to access a Calibre Content Server running on the local network. Previously implied by `INTERNET`. |
+| `POST_NOTIFICATIONS` | First time a background task (e.g. import or sync) needs to show progress | Display progress notifications for long-running background operations. |
+| `READ_CONTACTS` | First time you use the **Lending** feature and assign a borrower | Look up contact names from your address book so you can record who has borrowed a book. |
+
+---
+
+## Detailed Explanations
+
+<Accordion title="Camera — barcode scanning">
+  The `CAMERA` permission is used exclusively by the barcode scanner. It is requested the first time you tap the scan button on the **Add book** screen or in the book editor.
+
+  **You do not need a camera to use NeverTooManyBooks.** Books can be added manually by typing the title and author, or by searching online with a text query. If you decline the camera permission, all other features continue to work normally. If you later change your mind, grant the permission from **Android Settings → Apps → NeverTooManyBooks → Permissions**.
+
+  Camera hardware is declared as `android:required="false"` in the manifest, so the app can be installed on devices without a camera.
+</Accordion>
+
+<Accordion title="Internet & network state — online metadata searches">
+  `INTERNET`, `ACCESS_NETWORK_STATE`, and `ACCESS_WIFI_STATE` are declared in the manifest and are always granted automatically (they are "normal" permissions that do not require a runtime prompt).
+
+  - **`INTERNET`**: used every time you search for a book on an external site, download a cover image, or sync with a Calibre Content Server.
+  - **`ACCESS_NETWORK_STATE`**: checked before each network call so the app can show you a clear "No network connection" message instead of silently timing out.
+  - **`ACCESS_WIFI_STATE`**: used together with the **Allow metered network** setting in Settings → Search. When you disable metered access, the app checks this state and skips online searches if you are on mobile data.
+
+  **The app works fully offline** — browsing, editing, and organising your existing library requires no network access. Only metadata lookups and cover downloads need a connection.
+
+  <Tip>
+    You can restrict the app to Wi-Fi-only searches by disabling **Settings → Search → Allow metered network data**.
+  </Tip>
+</Accordion>
+
+<Accordion title="Storage — cover images and backups">
+  NeverTooManyBooks does **not** request broad `READ_EXTERNAL_STORAGE` or `WRITE_EXTERNAL_STORAGE` permissions on modern Android versions.
+
+  - **Android 10+ (API 29+)**: The app uses the **Storage Access Framework** (the system file picker) for all file operations — importing covers, exporting backups, and writing debug reports. The file picker grants scoped, one-time access to the specific file or folder you choose. No broad storage permission is needed or requested.
+  - **Android 9 and below**: Older Android versions may request `WRITE_EXTERNAL_STORAGE` when you export a backup to external storage, because the Storage Access Framework was not yet fully available. This affects very few users given the current Android version distribution.
+  - **SD card support (Android 9+)**: Switching the cover image storage location to an SD card (via **Settings → Advanced → Storage Volume**) uses the same scoped approach — no extra permission required.
+</Accordion>
+
+<Accordion title="Notifications — background task progress">
+  `POST_NOTIFICATIONS` is a runtime permission introduced in Android 13 (API 33). It is requested the first time the app needs to display a progress notification for a background task such as a large import, a sync operation, or a cover download batch.
+
+  Declining this permission does not prevent those operations from running — you simply will not see a persistent progress notification in the status bar. Progress is still shown in-app while the screen is open.
+</Accordion>
+
+<Accordion title="Contacts — book lending">
+  `READ_CONTACTS` is requested only if you use the **Lending** feature and try to select a borrower from your address book. The permission is used only to read contact names for display; no contact data is stored externally or shared.
+
+  If you prefer not to grant this permission, you can still record a borrower by typing a name manually. The Lending feature can also be disabled entirely via **Settings → Advanced → Lending enabled**.
+</Accordion>
+
+<Accordion title="Local network access — Calibre sync (Android 37+)">
+  `ACCESS_LOCAL_NETWORK` is a new permission introduced in Android API 37. It is required to communicate with a **Calibre Content Server** on your local network. On Android 36 and below, this access was implied by the `INTERNET` permission.
+
+  If you do not use Calibre sync, this permission has no practical effect.
+</Accordion>
+
+---
+
+## Summary: What the App Never Does
+
+- ❌ Does not access your location (no `ACCESS_FINE_LOCATION` or `ACCESS_COARSE_LOCATION`)
+- ❌ Does not use biometric authentication (no `USE_BIOMETRIC` or `USE_FINGERPRINT`)
+- ❌ Does not read, write, or delete your photos or media library
+- ❌ Does not send data to any advertising or analytics network
+- ❌ Does not run background sync without your explicit setup of the Calibre sync feature
+
+<Tip>
+  For the official permissions documentation maintained by the project, see the [NeverTooManyBooks GitHub Wiki](https://github.com/tfonteyn/NeverTooManyBooks/wiki).
+</Tip>

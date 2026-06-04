@@ -1,0 +1,284 @@
+---
+title: "Core Data Model: Entities, Fields, and Relationships"
+sidebarTitle: "Data Model"
+description: "SQLite schema reference for NeverTooManyBooks: Book, Author, Series, Publisher, Bookshelf, TocEntry, and Tag entities with their join-table relationships."
+---
+
+NeverTooManyBooks stores its data in a raw SQLite database managed by `DBHelper`, a subclass of `SQLiteOpenHelper`. The schema is defined entirely as static objects in `DBDefinitions` (tables, domains, indexes), while every column name and Android `Bundle` key is a `public static final String` constant in `DBKey`. This single-source-of-truth approach means the same constant is used in SQL, in Bundle serialisation, and in UI field-visibility settings — so renaming a column is a one-line change that the compiler enforces everywhere.
+
+<Note>
+  `DBKey` constants are the authoritative names for all database columns **and**
+  for Android `Bundle` / `Intent` extras throughout the codebase. Never use raw
+  string literals for field names — always reference the `DBKey` constant.
+</Note>
+
+## DBKey Constants Reference
+
+The most commonly referenced constants from `DBKey.java`:
+
+```java
+// ── Primary / foreign keys ─────────────────────────────────────────────────
+String PK_ID                  = "_id";           // auto-increment PK on every table
+String FK_BOOK                = "book";          // FK → books._id
+String FK_AUTHOR              = "author";        // FK → authors._id
+String FK_AUTHOR_PSEUDONYM    = "pseudonym";     // pseudonym_author.pseudonym → authors._id
+String FK_AUTHOR_REAL_AUTHOR  = "real_author";   // pseudonym_author.real_author → authors._id
+String FK_SERIES              = "series_id";     // FK → series._id
+String FK_PUBLISHER           = "publisher_id";  // FK → publishers._id
+String FK_BOOKSHELF           = "bookshelf_id";  // FK → bookshelves._id
+String FK_TOC_ENTRY           = "anthology";     // FK → toc_entries._id
+String FK_STYLE               = "style";         // FK → booklist_styles._id
+String FK_TAG                 = "tag_id";        // FK → tags.tag
+
+// ── Book identity ──────────────────────────────────────────────────────────
+String BOOK_UUID              = "book_uuid";           // 16-char hex UUID (no dashes)
+String TITLE                  = "title";
+String TRANSLATION_ORIGINAL_TITLE    = "title_original_lang";
+String TRANSLATION_ORIGINAL_LANGUAGE = "translation_orig_lang";
+
+// ── Bibliographic fields ───────────────────────────────────────────────────
+String ISBN                   = "isbn";
+String PUBLICATION_DATE       = "date_published";
+String FIRST_PUBLICATION_DATE = "first_publication";
+String PAGES                  = "pages";          // TEXT: supports "xxxvi+278"
+String FORMAT                 = "format";
+String COLOR                  = "color";
+String LANGUAGE               = "language";
+String DESCRIPTION            = "description";
+String CONTENT_TYPE           = "anthology";      // bitmask: novel/anthology/etc.
+String EDITION                = "edition_bm";     // bitmask of edition flags
+String PRINT_RUN              = "print_run";
+String PRICE_LISTED           = "list_price";
+String PRICE_LISTED_CURRENCY  = "list_price_currency";
+
+// ── Personal / reading fields ──────────────────────────────────────────────
+String READ__BOOL             = "read";
+String READ_START__DATE       = "read_start";
+String READ_END__DATE         = "read_end";
+String READ_PROGRESS          = "read_progress";  // JSON: pages or percentage
+String RATING                 = "rating";         // 0–5 in 0.5 increments; 0 = not set
+String PERSONAL_NOTES         = "notes";
+String LOCATION               = "location";
+String SIGNED__BOOL           = "signed";
+String CONDITION_BOOK         = "cond_bk";
+String CONDITION_COVER        = "cond_cvr";
+String PRICE_PAID             = "price_paid";
+String PRICE_PAID_CURRENCY    = "price_paid_currency";
+String DATE_ACQUIRED          = "date_acquired";
+String AUTO_UPDATE            = "auto_update";    // lock book from auto-updates
+
+// ── Timestamps (UTC) ───────────────────────────────────────────────────────
+String DATE_ADDED__UTC        = "date_added";
+String DATE_LAST_UPDATED__UTC = "last_update_date";
+```
+
+---
+
+## Entities
+
+### Book
+
+The central entity of the schema. Every other entity relates back to `books`.
+
+| Column | DBKey constant | Notes |
+|--------|---------------|-------|
+| `_id` | `PK_ID` | Auto-increment primary key |
+| `book_uuid` | `BOOK_UUID` | 16-char hex UUID (no dashes); globally unique identifier |
+| `title` | `TITLE` | Title as printed on cover |
+| `title_original_lang` | `TRANSLATION_ORIGINAL_TITLE` | Original title for translated works |
+| `isbn` | `ISBN` | Main ISBN field; additional ISBNs via `book_identifier` |
+| `date_published` | `PUBLICATION_DATE` | ISO partial date |
+| `first_publication` | `FIRST_PUBLICATION_DATE` | ISO partial date of first edition |
+| `pages` | `PAGES` | TEXT to support e.g. `"xxxvi+278"` |
+| `format` | `FORMAT` | Free-text (e.g. "Hardcover") |
+| `color` | `COLOR` | Free-text colour description |
+| `language` | `LANGUAGE` | ISO 639 language code |
+| `description` | `DESCRIPTION` | Publisher blurb / synopsis |
+| `anthology` | `CONTENT_TYPE` | Bitmask: novel, anthology, collection, etc. |
+| `edition_bm` | `EDITION` | Bitmask of edition flags |
+| `print_run` | `PRINT_RUN` | Print run description |
+| `list_price` | `PRICE_LISTED` | Listed (cover) price |
+| `list_price_currency` | `PRICE_LISTED_CURRENCY` | ISO 4217 currency code |
+| `price_paid` | `PRICE_PAID` | Amount paid |
+| `price_paid_currency` | `PRICE_PAID_CURRENCY` | ISO 4217 currency code |
+| `date_acquired` | `DATE_ACQUIRED` | ISO partial date of acquisition |
+| `read` | `READ__BOOL` | 0/1 read flag |
+| `read_start` | `READ_START__DATE` | ISO date reading started |
+| `read_end` | `READ_END__DATE` | ISO date reading finished |
+| `read_progress` | `READ_PROGRESS` | JSON object (pages or percentage) |
+| `rating` | `RATING` | 0.0–5.0 in 0.5 steps; 0 = not set |
+| `notes` | `PERSONAL_NOTES` | User's personal notes |
+| `location` | `LOCATION` | Physical location (shelf, room, etc.) |
+| `signed` | `SIGNED__BOOL` | 0/1 signed copy flag |
+| `cond_bk` | `CONDITION_BOOK` | Book condition value |
+| `cond_cvr` | `CONDITION_COVER` | Cover condition value |
+| `auto_update` | `AUTO_UPDATE` | 0/1 allow automatic data updates |
+| `date_added` | `DATE_ADDED__UTC` | UTC datetime of record creation |
+| `last_update_date` | `DATE_LAST_UPDATED__UTC` | UTC datetime of last modification |
+
+**Linked via join tables:** authors, series, publishers, bookshelves, TOC entries, tags, external identifiers.
+
+---
+
+### Author
+
+Stored in `TBL_AUTHORS`. Represents a person with one or more creative roles.
+
+| Column | DBKey constant | Notes |
+|--------|---------------|-------|
+| `_id` | `PK_ID` | Auto-increment PK |
+| `family_name` | `DBKey.AUTHOR.FAMILY_NAME` | Family/last name as entered |
+| `given_names` | `DBKey.AUTHOR.GIVEN_NAMES` | Given/first names; empty string if unknown |
+| `birth_date` | `DBKey.AUTHOR.BIRTH_DATE` | ISO partial date |
+| `death_date` | `DBKey.AUTHOR.DEATH_DATE` | ISO partial date |
+| `pic_uuid` | `DBKey.AUTHOR.PICTURE_UUID` | UUID of author photo (20-char with dashes) |
+| `author_complete` | `DBKey.AUTHOR.COMPLETE` | User flag: "I have everything by this author" |
+
+The `author_type` bitmask in `book_author` records the author's role(s) for a specific book (writer, translator, editor, cover artist, narrator, etc.). An author may be a pseudonym; the `pseudonym_author` table records the mapping to the real author.
+
+---
+
+### Series
+
+Stored in `TBL_SERIES`. Represents a named series of books.
+
+| Column | DBKey constant | Notes |
+|--------|---------------|-------|
+| `_id` | `PK_ID` | Auto-increment PK |
+| `series_name` | `DBKey.SERIES.TITLE` | Series title as entered |
+| `series_complete` | `DBKey.SERIES.COMPLETE` | User flag: "This series is finished" |
+
+The book's position number within the series (`series_num`) is stored in the `book_series` join table, not in `series` itself, because the same series object is shared across books. Numbers are stored as text to support values like `"1.5"`, `"0"`, or `"Omnibus"`.
+
+---
+
+### Publisher
+
+Stored in `TBL_PUBLISHERS`. A minimal entity — just a name.
+
+| Column | DBKey constant | Notes |
+|--------|---------------|-------|
+| `_id` | `PK_ID` | Auto-increment PK |
+| `publisher_name` | `DBKey.PUBLISHER.NAME` | Publisher name as entered |
+
+---
+
+### Bookshelf
+
+Stored in `TBL_BOOKSHELF`. Represents a named collection the user organises books into.
+
+| Column | DBKey constant | Notes |
+|--------|---------------|-------|
+| `_id` | `PK_ID` | Auto-increment PK |
+| `bookshelf_name` | `DBKey.BOOKSHELF.NAME` | Display name |
+| `style` (FK) | `FK_STYLE` | UUID of the display style applied to this shelf |
+| `bl_top_pos` | `DBKey.BOOKSHELF.BL_TOP_POS` | Saved scroll position (adapter position) |
+| `bl_top_offset` | `DBKey.BOOKSHELF.BL_TOP_OFFSET` | Saved scroll offset in pixels |
+
+A virtual `ALL_BOOKS` bookshelf (id = `-1`) represents the complete library without filtering.
+
+Filters per bookshelf are stored in `TBL_BOOKSHELF_FILTERS` (column `filter_name` / `filter_value`).
+
+---
+
+### TocEntry
+
+Stored in `TBL_TOC_ENTRIES`. Represents an individual story or article within an anthology or collection.
+
+| Column | DBKey constant | Notes |
+|--------|---------------|-------|
+| `_id` | `PK_ID` | Auto-increment PK |
+| `title` | `TITLE` | Title of the short work |
+| `first_publication` | `FIRST_PUBLICATION_DATE` | ISO partial date of first publication |
+| `author` (FK) | `FK_AUTHOR` | The primary author of this entry |
+
+---
+
+### Tag
+
+Stored in `TBL_TAGS`. User-defined tags (localised text labels).
+
+| Column | DBKey constant | Notes |
+|--------|---------------|-------|
+| `tag` | `DBKey.TAGS.TAG` | The tag text itself; also used as the join key in `TBL_TAG_MAPPINGS` |
+
+Tag mappings (associations between a tag name and a field/value combination) are stored in `TBL_TAG_MAPPINGS`.
+
+---
+
+## Entity Relationships
+
+The schema is fully normalised. All many-to-many relationships use explicit join tables:
+
+```
+books (TBL_BOOKS)
+│
+├─── book_author (TBL_BOOK_AUTHOR) ──── authors (TBL_AUTHORS)
+│       • author_type  (role bitmask)          │
+│       • author_position (order in list)       └─── pseudonym_author (TBL_PSEUDONYM_AUTHOR)
+│                                                       • pseudonym  → authors._id
+│                                                       • real_author → authors._id
+│
+├─── book_series (TBL_BOOK_SERIES) ───── series (TBL_SERIES)
+│       • series_num  (book's number in series, text)
+│       • series_position (order in list)
+│
+├─── book_publisher (TBL_BOOK_PUBLISHER) ── publishers (TBL_PUBLISHERS)
+│       • publisher_position (order in list)
+│
+├─── book_bookshelf (TBL_BOOK_BOOKSHELF) ── bookshelves (TBL_BOOKSHELF)
+│
+├─── book_toc_entries (TBL_BOOK_TOC_ENTRIES) ── toc_entries (TBL_TOC_ENTRIES)
+│       • toc_entry_position (order in list)
+│
+├─── book_identifier (TBL_BOOK_IDENTIFIER)
+│       • ident_id → identifiers (TBL_IDENTIFIERS)
+│       • sid  (the actual external ID value, e.g. ISFDB number)
+│
+└─── book_loanee (TBL_BOOK_LOANEE)
+        • loaned_to  (name of the person the book is lent to)
+```
+
+### Identifier System
+
+External site identifiers (ISFDB, Goodreads, StripInfo, etc.) are modelled as a flexible key–value system:
+
+- **`TBL_IDENTIFIERS`** — master table of identifier *types* (`key`, `name`, `entity`, `type`, `uri`, `site_url`, `wd_p_author_id`).
+- **`TBL_BOOK_IDENTIFIER`** — join table linking a book to an identifier value (`FK_BOOK`, `FK_IDENTIFIER`, `sid`).
+- **`TBL_AUTHOR_IDENTIFIER`** — same pattern for authors.
+- **`TBL_SERIES_IDENTIFIER`** — same pattern for series.
+
+This means a new external site can be added by inserting a row into `TBL_IDENTIFIERS` without a schema migration.
+
+### Pseudonym / Real Author
+
+The self-referential author relationship is handled by a dedicated join table rather than a nullable column on `authors`:
+
+```
+authors ──┐
+          ├─── pseudonym_author ─────── authors
+          │         pseudonym  (FK → authors._id)
+          └─────    real_author (FK → authors._id)
+```
+
+When `Author.getRealAuthor()` is called, it resolves any chain of pseudonyms and detects circular references before returning the terminal real-author.
+
+## Full-Text Search
+
+A dedicated FTS4 virtual table (`TBL_FTS_BOOKS`) is maintained in sync with the main `books` table by `FtsDao`. It concatenates author names, series titles, publisher names, and TOC titles into semicolon-delimited text columns for fast keyword search across the entire library.
+
+```java
+// FTS column constants (DBKey.FTS)
+String PK_BOOK_ID      = "docid";         // maps to books._id
+String AUTHOR_NAME     = "author_name";   // "stephen baxter;arthur c. clarke;"
+String SERIES_NAMES    = "series_name";
+String PUBLISHER_NAMES = "publisher_name";
+String TOC_ENTRY_TITLE = "toc_title";
+```
+
+<Tip>
+  The FTS table is rebuilt asynchronously during startup and after bulk
+  imports. If you add a new text field to `books` that should be searchable,
+  update both `FtsDaoHelper` (which builds the INSERT/UPDATE SQL) and the
+  FTS table definition in `DBDefinitions`.
+</Tip>

@@ -1,0 +1,135 @@
+---
+title: "Back Up and Restore Your NeverTooManyBooks Collection"
+sidebarTitle: "Backup & Restore"
+description: "Learn how to create full backups of your books, covers, and settings, restore from a backup file, and keep your data safe across devices."
+---
+
+NeverTooManyBooks stores everything — your books, bookshelves, cover images, reading styles, and app preferences — in a single, portable ZIP archive (`.ntmb` or `.zip`). Creating regular backups protects against data loss from accidental deletion, app reinstalls, or device changes, and the same backup file can be used to migrate your entire collection to a new phone.
+
+## Backup formats
+
+The primary backup format is a ZIP-based archive that can contain any combination of the following record types:
+
+<CardGroup cols={2}>
+  <Card title="Books & Bookshelves" icon="book">
+    All book records stored as JSON, including authors, series, publishers, and bookshelf assignments.
+  </Card>
+  <Card title="Cover Images" icon="image">
+    Full-resolution cover art for every book in your collection. Can be large for big libraries.
+  </Card>
+  <Card title="Preferences" icon="sliders">
+    All app settings, custom identifiers, tag definitions, and Calibre library configurations.
+  </Card>
+  <Card title="Styles" icon="palette">
+    Your custom book-list display styles and sort configurations.
+  </Card>
+</CardGroup>
+
+<Note>
+  A backup file is a standard ZIP archive. You can rename it with a `.zip` extension and inspect its contents with any ZIP tool. Files can be copied freely between Android devices — the format is not device-specific.
+</Note>
+
+---
+
+## Creating a backup
+
+<Steps>
+  <Step title="Open the Backup & Export screen">
+    Tap the navigation menu (hamburger icon) and choose **Backup & Export**. The screen shows all available export options.
+  </Step>
+  <Step title="Select the archive format">
+    Choose **ZIP (backup)** from the format dropdown. This is the default and the only format that supports the full set of record types including cover images.
+  </Step>
+  <Step title="Choose what to include">
+    Toggle the checkboxes to select the content you want in the backup:
+
+    - **Books** — your entire book database (always recommended)
+    - **Covers** — cover image files (can add significant file size for large collections)
+    - **Preferences** — app settings, Calibre credentials, custom tags, and identifiers
+    - **Styles** — your personalised list display styles
+
+    Preferences and Styles are included by default when the ZIP format is selected.
+  </Step>
+  <Step title="Choose the export scope">
+    Select one of the two radio buttons:
+
+    - **All books** — exports every book regardless of when it was last changed
+    - **New and updated books only** — exports only books modified since the last full backup (incremental export)
+  </Step>
+  <Step title="Pick a save location">
+    Tap the **upload** button (floating action button). Android's file picker opens. Navigate to your preferred folder and confirm the filename. The app proposes a filename in the format `ntmb-YYYY-MM-DD` with the appropriate extension.
+  </Step>
+  <Step title="Wait for completion">
+    A progress dialog shows export status. When finished, a summary dialog reports how many books, images, bookshelves, styles, and preferences were written. Files smaller than 5 MB also offer an option to share the backup directly via email.
+  </Step>
+</Steps>
+
+<Tip>
+  Save backups to a cloud storage folder (Google Drive, Dropbox, OneDrive, or similar) so they are automatically off-device. This means your collection survives phone loss or factory resets without any extra steps.
+</Tip>
+
+---
+
+## Restoring from a backup
+
+<Steps>
+  <Step title="Open the Import screen">
+    Tap the navigation menu and choose **Import**. The file picker opens immediately so you can select a backup file.
+  </Step>
+  <Step title="Select the backup file">
+    Pick your `.ntmb` or `.zip` backup file. The app reads the archive metadata and displays a summary of its contents — creation date, number of books, and number of images — so you can confirm you have the right file before proceeding.
+  </Step>
+  <Step title="Choose what to restore">
+    Depending on what the archive contains, you can selectively enable or disable:
+
+    - **Books** — restores all book records and related data (authors, series, bookshelves)
+    - **Covers** — restores cover image files
+    - **Preferences** — restores app settings, custom tags, and identifiers
+    - **Styles** — restores your custom display styles
+  </Step>
+  <Step title="Set the conflict handling strategy">
+    Choose how the app resolves conflicts when a book in the backup already exists in your current database:
+
+    | Option | Behaviour |
+    |---|---|
+    | **New only (Skip)** | Keeps the existing record; the backup version is ignored |
+    | **New and updated** | Replaces the existing record only if the backup version is newer |
+    | **All (Overwrite)** | Always replaces the existing record with the backup version |
+
+    **New and updated** is the default and is appropriate for most restore scenarios.
+  </Step>
+  <Step title="Start the restore">
+    Tap the **download** button (floating action button). A progress dialog tracks the import. When complete, a summary reports books added, books updated, bookshelves created, styles imported, and any rows that could not be parsed.
+  </Step>
+</Steps>
+
+<Warning>
+  Restoring cover images for a large collection can be a slow process — each image file is extracted and written individually. Avoid locking your screen or switching away from the app while a cover restore is running, especially over thousands of books.
+</Warning>
+
+---
+
+## Automatic backup prompts
+
+NeverTooManyBooks tracks how many times the app has been opened since the last full backup. By default the app prompts you to create a backup every **5 app launches** after the last recorded full backup date. This prompt appears at startup and is a reminder only — you are not required to back up immediately.
+
+Completing a full (non-incremental) ZIP export resets the countdown. Incremental exports do not reset it, since they do not capture the full collection state.
+
+---
+
+## Tips for reliable backups
+
+<CardGroup cols={2}>
+  <Card title="Use cloud storage" icon="cloud">
+    Point the file picker at a Google Drive or Dropbox folder. Your backup is immediately synced off-device without any manual transfer step.
+  </Card>
+  <Card title="Keep multiple backups" icon="copy">
+    Android's file picker lets you save with a date-stamped filename. Keep at least two or three recent backups so you can roll back further if needed.
+  </Card>
+  <Card title="Exclude covers for speed" icon="bolt">
+    If you back up frequently, uncheck **Covers** for day-to-day incremental backups and only include them for monthly full backups.
+  </Card>
+  <Card title="Share across devices" icon="share">
+    Transfer the `.ntmb` file to a new device (via cloud storage, email, or USB) and import it to clone your collection exactly, including bookshelves and styles.
+  </Card>
+</CardGroup>

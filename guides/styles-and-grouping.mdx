@@ -1,0 +1,176 @@
+---
+title: "Book List Styles and Grouping in NeverTooManyBooks"
+sidebarTitle: "Styles & Grouping"
+description: "Learn how styles control the way your booklist is grouped, sorted, and displayed — and how to create, clone, and switch between your own custom styles."
+---
+
+A **Style** in NeverTooManyBooks is a saved configuration that decides everything about how your book list looks and behaves: which hierarchy levels the list is split into (e.g. Author → Series → Book), how each level is sorted, which fields appear on each row, how large the cover thumbnails are, and even the font scale. Every bookshelf remembers the last style you used on it, so you can have one style for your fiction shelf and a completely different one for your reference shelf without any manual switching.
+
+---
+
+## Built-in vs. User Styles
+
+NeverTooManyBooks ships with a set of **built-in styles** that cover the most common browsing modes. Built-in styles cannot be edited directly, but any of them can be **cloned** into a fully editable user style in one tap.
+
+<Note>
+  Built-in styles are read-only by design — they serve as reliable starting points that are never accidentally broken. To customise one, tap the **clone** button in the style picker and give your copy a name. All settings of the original are copied over and are then freely editable.
+</Note>
+
+### Built-in Styles
+
+| Style name | Default grouping |
+|---|---|
+| **Author & Series** *(default)* | Author → Series |
+| **Title (A–Z)** | Book title first character |
+| **Series** | Series |
+| **Tags** | Tags/Genre → Author → Series |
+| **Lending** | Loanee → Author → Series |
+| **Read & Unread** | Read status → Author → Series |
+| **Publication date** | Publication year → Publication month → Author → Series |
+| **Date added** | Year added → Month added → Day added → Author |
+| **Date acquired** | Year acquired → Month acquired → Day acquired → Author |
+| **Author & Year** | Author → Publication year → Series |
+| **Format** | Format |
+| **Date read** | Year read → Month read → Author |
+| **Location** | Location → Author → Series |
+| **Language** | Language → Author → Series |
+| **Rating** | Rating → Author → Series |
+| **Bookshelf** | Bookshelf → Author → Series |
+| **Date last updated** | Year updated → Month updated → Day updated |
+
+---
+
+## Switching Styles
+
+Tap the **Style button** in the book list toolbar (it shows the current style name). The style picker slides up and lists all preferred styles. Tap any style to apply it instantly — the list rebuilds without leaving the screen.
+
+---
+
+## Creating a Custom Style
+
+<Steps>
+  <Step title="Open the style picker">
+    In the book list toolbar, tap the **Style** button to open the style picker sheet.
+  </Step>
+  <Step title="Choose a starting point">
+    Either tap the **+** button to start from the current global defaults, or long-press an existing style and tap **Clone** to copy all its settings into a new style.
+  </Step>
+  <Step title="Name your style">
+    Enter a descriptive name. The name appears in the style picker and on the bookshelf header.
+  </Step>
+  <Step title="Configure groups">
+    In the **Groups** section, add, remove, or reorder the group levels that structure your list (see [Available Groups](#available-groups) below).
+  </Step>
+  <Step title="Adjust display settings">
+    Set cover thumbnail size, text scale, book-level fields, header fields, and — on tablets — the screen layout.
+  </Step>
+  <Step title="Save">
+    Tap **Save** (or navigate back). The new style is immediately available in the picker. Mark it as **Preferred** if you want it to appear near the top of the picker list.
+  </Step>
+</Steps>
+
+---
+
+## Style Settings Reference
+
+<Accordion title="Groups">
+  Groups define the hierarchy of the list. The first group is the top level (e.g. Author), the second is nested inside it (e.g. Series), and books appear below the deepest group.
+
+  Each group can be added once or, for some types like date groups, replaced with a coarser or finer variant (e.g. year-only vs. year + month + day).
+
+  **Show books under each group** — For Author, Series, Publisher, and Bookshelf groups, you can choose whether a book that belongs to multiple entries (e.g. two authors) appears under *each* of them or only under the primary one.
+</Accordion>
+
+<Accordion title="Sorting">
+  Each group level has its own sort direction (ascending A→Z or descending Z→A). The sort order of the book level itself is configured separately via the **Book level fields** setting, which lets you specify one or more fields to sort books by within each group, each with its own ascending/descending direction.
+</Accordion>
+
+<Accordion title="Book-level fields">
+  Choose which fields are displayed on each individual book row in the list. Visibility here is independent of the global [Field Visibility](/guides/settings#field-visibility) setting — you may globally enable a field but still hide it on the list row to keep rows compact.
+</Accordion>
+
+<Accordion title="Cover scale">
+  Sets the size of cover thumbnails shown in the list. Options range from hidden (no thumbnail) through small, medium, and large. Larger thumbnails make browsing more visual but show fewer books per screen.
+</Accordion>
+
+<Accordion title="Text scale">
+  Adjusts the font size used for group headings and book titles in the list, independently of the system font size.
+</Accordion>
+
+<Accordion title="Header fields">
+  Choose which summary fields appear in the group row header (e.g. the number of books, the Author's full name style). You can toggle each header element on or off per style.
+</Accordion>
+
+<Accordion title="Screen layout (tablet only)">
+  On larger screens, choose between:
+  - **Single pane** — the list fills the screen; tapping a book opens a full-screen detail view.
+  - **Dual pane** — the list occupies the left column and the book detail view is always visible on the right. Note: when the embedded detail frame is active the list always uses the standard list layout regardless of this setting.
+</Accordion>
+
+<Accordion title="Cover tap & long-press actions">
+  - **Tap action**: Zoom the cover in a dialog, or navigate directly to the book detail screen.
+  - **Long-press action**: Ignore, or open the book's context menu as a popup anchored to the cover.
+</Accordion>
+
+<Accordion title="Author display options">
+  Per style you can override:
+  - **Display by given name** — "Isaac Asimov" vs. "Asimov, Isaac".
+  - **Sort by given name** — affects the order within an Author group.
+  - **Primary author role** — which author roles (Writer, Editor, Translator, …) are considered "primary" when selecting which author to group a book under.
+</Accordion>
+
+<Accordion title="Title display">
+  **Reordered titles** — show "Lord of the Rings, The" instead of "The Lord of the Rings" in group headings and book rows. This mirrors the global sort-reorder setting but can be overridden per style.
+</Accordion>
+
+<Accordion title="Row height">
+  Toggle between the system's preferred list item height and a compact wrap-content height for denser lists.
+</Accordion>
+
+<Accordion title="Expansion level">
+  Set which level of the group hierarchy is visible but not yet expanded when you first open (or rebuild) the list. For example, with an Author → Series hierarchy and expansion level 1, you see all authors collapsed; level 2 shows authors expanded with series collapsed.
+</Accordion>
+
+<Accordion title="Book count">
+  Show or hide the running count of books next to each group heading.
+</Accordion>
+
+---
+
+## Available Groups
+
+The full set of grouping dimensions you can add to any style:
+
+| Group | Description |
+|---|---|
+| **Author** | Groups by the book's primary author (respects the "show under each" option for books with multiple authors) |
+| **Series** | Groups by series name |
+| **Tags / Genre** | Groups by user-assigned tags (formerly the Genre field) |
+| **Publisher** | Groups by publisher name |
+| **Bookshelf** | Groups by the bookshelf the book is on |
+| **Read status** | Read vs. Unread |
+| **Lending** | Who currently has the book on loan |
+| **Format** | Hardcover, Paperback, eBook, etc. |
+| **Language** | Book language |
+| **Location** | Physical shelf location |
+| **Rating** | Star rating (0–5) |
+| **Color** | Book colour tag |
+| **Condition** | Physical condition of the copy |
+| **Original language** | Language of the original work (for translations) |
+| **Identifier** | External identifier type (ISBN, LibraryThing ID, etc.) |
+| **Book title 1st char** | Alphabetical index by first letter of title |
+| **Series title 1st char** | Alphabetical index by first letter of series name |
+| **Author family name 1st char** | Alphabetical index by first letter of author family name |
+| **Publisher name 1st char** | Alphabetical index by first letter of publisher name |
+| **Publication year / month** | Year and/or month of publication |
+| **First publication year / month** | Year and/or month of original publication |
+| **Date added year / month / day** | When the book was added to your library |
+| **Date acquired year / month / day** | When you acquired the physical copy |
+| **Date read year / month / day** | When you finished reading |
+| **Date last updated year / month / day** | When the book record was last changed |
+
+---
+
+## Per-Bookshelf Style Memory
+
+Each bookshelf independently remembers the last style you applied to it. Switching to a different bookshelf automatically restores whichever style you were using there. This means your **Fiction** shelf can stay in Author & Series view while your **To Read** shelf uses Read & Unread grouping — no manual toggling required.

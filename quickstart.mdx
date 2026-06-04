@@ -1,47 +1,93 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Quickstart: Scan and Save Your First Book in 5 Minutes"
+sidebarTitle: Quickstart
+description: "Scan a barcode, pull metadata from the web, and have your first book saved in your personal library within five minutes of opening NeverTooManyBooks."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
-
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
-
-## Prerequisites
-
-Before you begin, you must have:
-
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
-
-## Get started
+This guide walks you through everything from opening the app for the first time to having a fully catalogued book sitting on a named bookshelf — all in about five minutes. NeverTooManyBooks is designed so that adding a book is as friction-free as possible: point your camera at a barcode, confirm the details the app fetches automatically, and tap Save. The steps below show exactly how to do that, plus how to explore the library view and begin organising your collection.
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Open the App — Meet the Books on Bookshelf Screen">
+    After launching NeverTooManyBooks for the first time, the startup activity initialises the database and then hands off to the **Books on Bookshelf** screen. This is the app's home screen and the hub for everything you will do day-to-day.
 
-    ```bash
-    npm install your-package
-    ```
+    At the top you will see the current bookshelf name (defaulting to *My Books*). The main area lists your books grouped according to the active display style. Right now it will be empty — that is about to change.
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+  <Step title="Tap the + Button to Add a Book">
+    Tap the **floating action button (FAB)** — the large **+** icon in the bottom-right corner of the screen. A menu appears offering several ways to add a book:
 
-    ```bash
-    your-cli init
-    ```
+    - **Scan Barcode** — use the device camera to scan an ISBN barcode
+    - **Search by ISBN** — type or paste an ISBN manually
+    - **Search by Text** — search by title, author, or keywords
+    - **Add Manually** — fill in all fields yourself without a web lookup
+
+    For most books you own physically, choose **Scan Barcode** or **Search by ISBN**.
+
+    <Tip>
+      Don't have the physical book to hand? Choose **Search by Text** and type the title or author's name. NeverTooManyBooks will query the enabled data sources and return a list of matching books you can select from.
+    </Tip>
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
+  <Step title="Scan the Book's Barcode">
+    Point your camera at the barcode on the back cover of the book. The integrated scanner recognises standard ISBN-10 and ISBN-13 barcodes (and ASINs for Amazon-only titles).
 
-    ```bash
-    your-cli start
-    ```
+    Once the barcode is detected, the app immediately queries all of your enabled data sources in parallel — you will see a progress indicator as results come in. No extra tapping required.
+
+    **Batch scanning mode:** if you are adding many books in one session, the scanner can stay open between scans. Each recognised barcode is queued and processed in the background so you can keep scanning without waiting. A *Save* button lets you commit queued books directly without opening the edit screen for each one.
+  </Step>
+  <Step title="Review the Fetched Metadata and Save">
+    After the search completes, the **Edit Book** screen opens pre-filled with data gathered from your enabled sources. Review the fields — typically:
+
+    - Title, subtitle, and language
+    - Author(s) and their role (author, editor, illustrator, etc.)
+    - Cover image (the app picks the best one found; you can swap it)
+    - ISBN-10 and ISBN-13
+    - Publisher and publication date
+    - Series name and number
+    - Genre and description
+
+    Make any corrections you like, then tap **Save** (the checkmark icon in the toolbar). Your book is now stored locally in the app's database.
+
+    <Note>
+      The set of data sources queried — and their priority order — is fully configurable. Go to **Settings → Search → Websites** to enable, disable, or re-order sources. Sites can also be configured individually (for example, choosing an Amazon regional store or enabling high-resolution covers from DNB).
+    </Note>
+  </Step>
+  <Step title="Find Your Book in the Library">
+    After saving, you return to the **Books on Bookshelf** screen where the new book appears in the list. Tap the book's row to open the **Book Details** view, which shows all saved fields, the cover image, and quick-action buttons for marking the book as read, loaning it, or editing it.
+
+    Swipe left or right on a book row (depending on your gesture settings) to reveal quick actions without opening the detail view.
+  </Step>
+  <Step title="Create a Bookshelf to Organise Your Collection">
+    Bookshelves are named containers — think of them like physical shelves or reading lists. To create one:
+
+    1. Open the **navigation drawer** by tapping the hamburger icon (☰) in the top-left corner.
+    2. Tap **Manage Bookshelves**.
+    3. Tap the **+** button, enter a name (e.g. *Science Fiction*, *To Read*, *Lent Out*), and tap **OK**.
+
+    You can then assign any book to one or more bookshelves from the Edit Book screen, or by long-pressing a book in the list.
+  </Step>
+  <Step title="Customise Your Library View">
+    NeverTooManyBooks supports multiple display **styles** that control how books are grouped and sorted. To change the current style:
+
+    1. On the Books on Bookshelf screen, tap the **Style** button (the panel-layout icon near the top-right, or accessible from the overflow menu).
+    2. Choose a built-in style such as *Author, Family name*, *Series*, *Genre*, or *Publication year*.
+    3. The list immediately regroups — collapsible headers appear for each group value.
+
+    You can also create custom styles with your own combination of grouping levels and sort fields from the Style editor.
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+## What to Explore Next
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
+<CardGroup cols={2}>
+  <Card title="Adding Books" icon="book-open" href="/guides/adding-books">
+    Learn all the ways to add books — scanning, text search, manual entry, and importing from CSV or other apps.
+  </Card>
+  <Card title="Bookshelves" icon="books" href="/guides/bookshelves">
+    Create, rename, and manage bookshelves to keep your collection organised exactly the way you want.
+  </Card>
+  <Card title="Search Engines" icon="magnifying-glass" href="/guides/search-engines">
+    Configure which data sources are queried, set their priority, and tune individual site options.
+  </Card>
+  <Card title="Settings" icon="gear" href="/guides/settings">
+    Explore the full Settings screen — UI language, display preferences, backup schedules, and more.
+  </Card>
+</CardGroup>

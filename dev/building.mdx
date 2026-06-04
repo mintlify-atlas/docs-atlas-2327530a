@@ -1,0 +1,188 @@
+---
+title: "Setting Up and Building NeverTooManyBooks Locally"
+sidebarTitle: "Building"
+description: "Step-by-step guide to setting up Android Studio, configuring the Java toolchain, signing configs, and running tests and code-quality checks."
+---
+
+NeverTooManyBooks is a standard Android Gradle project. A clean debug build requires no special credentials or keys — just a working Android development environment. Release builds require an external signing configuration loaded from a properties file outside the repository root, so signing secrets are never committed to version control.
+
+<Steps>
+
+### Install Prerequisites
+
+Ensure the following tools are available on your machine before cloning:
+
+- **Android Studio** — use the latest stable release. The `BUILDING` file notes to use whichever latest or non-broken version works; there is no minimum pinned version in the repo.
+- **JDK 17 or later** — the Gradle Java toolchain reads the required version from the version catalog (`libs.versions.javaToolchain`). Gradle will automatically provision the correct JDK via toolchain resolution if it is not already installed, but having JDK 17+ available locally avoids a download on first build.
+- **Android SDK** — install via Android Studio's SDK Manager. The project uses:
+  - **`minSdk`**: API 26 (Android 8.0 Oreo)
+  - **`compileSdk`** / **`targetSdk`**: API 36 (latest stable at time of writing)
+  - Install both the platform package and the Build Tools for each SDK level you need.
+
+<Note>
+  The commit hash of `HEAD` is captured at build time and embedded in
+  `BuildConfig.GIT_HASH` via:
+  ```gradle
+  def buildingFromCommitHash = providers.exec {
+      commandLine 'git', 'rev-parse', '--short=12', 'HEAD'
+  }.standardOutput.asText.get().strip()
+  ```
+  This means every APK carries a 12-character git hash for traceability.
+  Make sure `git` is on your `PATH` before building.
+</Note>
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/tfonteyn/NeverTooManyBooks.git
+cd NeverTooManyBooks
+```
+
+### Open in Android Studio
+
+1. Launch Android Studio.
+2. Select **File → Open** (or **Open** from the Welcome screen).
+3. Navigate to the cloned folder and click **OK**.
+4. Android Studio will detect the Gradle project and sync automatically. Allow the initial sync to finish — it will download all declared dependencies.
+
+### Select a Build Variant
+
+Open the **Build Variants** panel (bottom-left in Android Studio, or **View → Tool Windows → Build Variants**) and choose:
+
+<Tabs>
+  <Tab title="debug">
+    **Recommended for development.** No signing configuration is required. The application ID gains a `.debug` suffix (`com.hardbacknutter.nevertoomanybooks.debug`), so a debug build can be installed alongside a release build.
+
+    ```bash
+    ./gradlew assembleDebug
+    ```
+
+    The output APK is named `NeverTooManyBooks-<versionName>-debug.apk` and located in `app/build/outputs/apk/debug/`.
+  </Tab>
+  <Tab title="beta">
+    Initialised from the `release` config with a `-beta` version name suffix. Requires the same signing configuration as `release`. Used for public beta distributions.
+
+    ```bash
+    ./gradlew assembleBeta
+    ```
+  </Tab>
+  <Tab title="release">
+    Requires a signing configuration (see the next step). Enables minification (`minifyEnabled = true`) and resource shrinking (`shrinkResources = true`) via ProGuard/R8.
+
+    ```bash
+    ./gradlew assembleRelease
+    ```
+  </Tab>
+</Tabs>
+
+### Configure Release Signing (Release Builds Only)
+
+<Warning>
+  Without a valid signing configuration, `assembleRelease` will print
+  `"Keystore properties file not found. No signing configuration will be applied."` and produce an **unsigned** APK that cannot be installed on a device. Always configure signing before distributing a release build.
+</Warning>
+
+Signing credentials are kept entirely outside the repository. The lookup chain is:
+
+**Step 1.** Add the path to your properties file in `$HOME/.gradle/gradle.properties`:
+
+```properties
+NeverTooManyBooks.properties=/path/to/NeverTooManyBooks.properties
+```
+
+**Step 2.** Create the referenced properties file with your keystore details:
+
+```properties
+sign.storeFile=/path/to/keystore.jks
+sign.storePassword=MyStorePassword
+sign.keyAlias=MyKeyAlias
+sign.keyPassword=MyKeyPassword
+```
+
+Gradle reads these values in `app/build.gradle` via:
+
+```gradle
+signingConfigs {
+    release {
+        if (!keystoreProperties.isEmpty()) {
+            storeFile     = file(keystoreProperties["sign.storeFile"])
+            storePassword = keystoreProperties["sign.storePassword"]
+            keyAlias      = keystoreProperties["sign.keyAlias"]
+            keyPassword   = keystoreProperties["sign.keyPassword"]
+        }
+    }
+}
+```
+
+### Run Unit Tests
+
+JUnit 5 is used for unit tests (via the `mannodermaus` Gradle plugin):
+
+```bash
+# Run all unit tests (JVM)
+./gradlew test
+
+# Run unit tests for a specific module
+./gradlew :app:testDebugUnitTest
+```
+
+Test XML reports are written to `<module>/build/reports/tests/`; HTML reports are disabled by default (configured in the root `build.gradle`).
+
+### Run Instrumented Tests
+
+Instrumented tests require a connected Android device or running emulator:
+
+```bash
+./gradlew connectedAndroidTest
+```
+
+The test runner is `androidx.test.runner.AndroidJUnitRunner` with the JUnit 5 `AndroidJUnit5Builder` configured via `testInstrumentationRunnerArguments`.
+
+### Run Code Style Checks
+
+A `checkstyle.xml` configuration is provided in the repository. Run the check with:
+
+```bash
+./gradlew checkstyle
+```
+
+Fix any reported violations before submitting a pull request. The lint task is also available, though `abortOnError` is set to `false` to allow command-line CI builds to complete even with warnings:
+
+```bash
+./gradlew lint
+```
+
+</Steps>
+
+## Code Tags
+
+The codebase uses a consistent set of inline comment tags (always followed by a colon) to annotate work items at the point of the relevant code:
+
+| Tag          | Meaning |
+|--------------|---------|
+| `URGENT:`    | Not a show-stopper, but really needs attention soon |
+| `TEST:`      | Work done and minimally tested; full testing not yet complete |
+| `RELEASE:`   | Must be checked before any public release |
+| `NEWTHINGS:` | Notes on how to wire in new functionality of a given type |
+| `FIXME:`     | A workaround is present or the situation is acceptable, but needs a proper fix |
+| `TODO:`      | Needs work — time permitting |
+| `ENHANCE:`   | An improvement worth making — time permitting |
+
+<Tip>
+  Use your IDE's **TODO** tool window (in Android Studio: **View → Tool Windows → TODO**) with a custom filter pattern to find all project-specific tags at once. Set the pattern to `\b(URGENT|TEST|RELEASE|NEWTHINGS|FIXME|TODO|ENHANCE):\b`.
+</Tip>
+
+## Gradle Performance Tuning
+
+The `gradle.properties` file enables several Gradle performance features that speed up incremental builds:
+
+```properties
+org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8
+org.gradle.caching=true
+org.gradle.configuration-cache=true
+org.gradle.configureondemand=true
+org.gradle.parallel=true
+org.gradle.vfs.watch=true
+```
+
+If you encounter configuration-cache failures during development (e.g., after changing build scripts), run `./gradlew --no-configuration-cache <task>` to bypass the cache for that invocation.

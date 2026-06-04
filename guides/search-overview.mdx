@@ -1,0 +1,74 @@
+---
+title: "Book Search Pipeline: Parallel Queries and Metadata Merge"
+sidebarTitle: "Search Overview"
+description: "A complete walkthrough of how NTMB queries multiple sites in parallel, merges metadata fields, and downloads cover images whenever you look up a book."
+---
+
+When you search for a book, NeverTooManyBooks doesn't query a single authoritative database — it fans out to every enabled search site simultaneously, collects whatever each one returns, and then intelligently merges those results into a single, richly populated book record. This parallel architecture means you benefit from the breadth of a general catalogue like Google Books, the depth of a specialist database like ISFDB, and the regional coverage of a local shop like Bertrand.pt, all in one tap.
+
+## Search Modes
+
+NeverTooManyBooks supports three distinct ways to look up a book, each handled by a dedicated interface in the search engine layer.
+
+<CardGroup cols={3}>
+  <Card title="By ISBN / Barcode" icon="barcode">
+    Scan a barcode or type an ISBN-10/ISBN-13 directly. This triggers a **concurrent** search across all enabled sites at once, since the identifier is unambiguous. This is the fastest and most accurate path.
+  </Card>
+  <Card title="By External ID" icon="fingerprint">
+    Use a site-specific identifier (e.g. a Goodreads book ID, an ISFDB title ID, or a DNB number) to query that single engine precisely. Useful when you already know exactly where the book lives.
+  </Card>
+  <Card title="By Text" icon="magnifying-glass">
+    Enter a title, author name, or any keyword. Sites are queried **one at a time** in priority order until a valid ISBN is found, at which point a fresh concurrent ISBN search is automatically launched for maximum coverage.
+  </Card>
+</CardGroup>
+
+## How the SearchCoordinator Works
+
+The `SearchCoordinator` is the central engine that manages all active searches as background tasks and feeds results back to the UI.
+
+<Steps>
+  <Step title="You submit a query">
+    You provide an ISBN, an external ID, or free text. The coordinator inspects which type of input it received and selects the appropriate search strategy.
+  </Step>
+  <Step title="Sites are queried in parallel (ISBN/ID) or serially (text)">
+    For ISBN and external-ID searches, all enabled sites are started concurrently. For text searches, sites are tried one at a time in your configured priority order. If any text-search result contains an ISBN, the serial search stops immediately and a new **concurrent** ISBN search is launched across all sites.
+  </Step>
+  <Step title="Results arrive asynchronously">
+    Each site's response arrives independently. The coordinator tracks progress per engine and reports it to the UI so you can see which sites are still running.
+  </Step>
+  <Step title="Metadata fields are merged">
+    As each result arrives it is merged into a single accumulator. The rule is **first non-empty value wins**: whichever site responds first with a value for a given field (title, author, publisher, etc.) sets that field; later results do not overwrite it. You can tune which fields to accept from searches via per-field settings.
+  </Step>
+  <Step title="A book record is created">
+    Once all searches have completed or been cancelled, the merged data is presented for review and saved as a book in your collection.
+  </Step>
+</Steps>
+
+<Note>
+  NeverTooManyBooks fetches data **on demand only**. No metadata from external sites is cached or stored permanently beyond what you explicitly save to your collection. Each search is a fresh, live request.
+</Note>
+
+## Cover Images
+
+Cover images are downloaded as part of a search result. When multiple cover options are available — for example, different editions detected by engines that implement the alternative-editions feature — you can open the **Cover Browser** to pick the image you prefer before saving the record.
+
+<Tip>
+  If a search returns a low-resolution cover, check whether the site has a high-resolution option. DNB (German National Library), for instance, can return high-res covers when that setting is enabled in its site preferences.
+</Tip>
+
+## Field Merge Priority
+
+Because multiple sites can return different values for the same field, understanding the merge order matters.
+
+| Scenario | Outcome |
+|---|---|
+| Site A returns a title, Site B also returns one | Site A's title is kept (first non-empty wins) |
+| Site A has no publisher, Site B does | Site B's publisher is used |
+| Both sites return the same ISBN | Stored once, no duplication |
+| Sites return different cover images | All are offered in the Cover Browser |
+
+The site priority order — set by dragging rows in **Settings → Search → Websites** — determines which site is "first" for concurrent searches and thus which values take precedence in the merge.
+
+## Cancellation and Error Handling
+
+You can cancel an in-progress search at any time. Individual site errors (network timeout, site blocking the request, authentication failure) are reported per-engine but do not abort the entire search — the coordinator continues with the remaining sites. Errors that require your attention, such as authentication failures or local storage problems, are surfaced immediately as actionable alerts.

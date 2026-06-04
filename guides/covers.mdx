@@ -1,0 +1,102 @@
+---
+title: "Managing Cover Images for Your Books"
+sidebarTitle: "Covers"
+description: "Fetch, replace, and delete cover images — browse alternatives online, snap a photo, pick a local file, and learn how covers are stored and backed up."
+---
+
+Cover images bring your book list to life and make scanning your collection at a glance much faster. NeverTooManyBooks supports up to four images per book (front cover, back cover, and two additional slots), stores them privately on your device, and includes them automatically in ZIP backups. Covers are fetched from enabled search sites when you first add a book, but you can replace, rotate, or delete any image at any time — and the Cover Browser lets you scroll through alternative images from multiple online sources to find the best match.
+
+## Automatic Cover Fetching
+
+When you add a book via barcode scan, ISBN entry, external ID, or text search, the app requests cover images from all enabled search sites as part of the normal lookup. The best available image is stored as the front cover (`cover index 0`). If a site provides a back cover it is stored as `cover index 1`.
+
+No extra steps are needed — covers arrive along with the rest of the bibliographic data.
+
+## Changing a Cover Image
+
+<Steps>
+  <Step title="Open book details">
+    Tap the book in the list to open its details screen.
+  </Step>
+  <Step title="Tap the cover image">
+    Tap the front or back cover thumbnail. A context menu appears with all available actions. If no cover exists yet, tap the placeholder image area.
+  </Step>
+  <Step title="Choose an action">
+    Select one of the options described in the sections below.
+  </Step>
+  <Step title="Confirm the new image">
+    The cover updates immediately in the details view. The change is saved to disk at once — no need to tap a separate save button for cover changes.
+  </Step>
+</Steps>
+
+## Cover Sources
+
+<Accordion title="Cover Browser — find alternatives online">
+  The Cover Browser queries all your enabled data sources for alternative cover images and displays them in a swipeable carousel.
+
+  1. Tap the cover image → **Find cover online** (or **Browse covers**).
+  2. The browser opens and begins fetching thumbnails. Swipe left and right to preview each candidate image in full size.
+  3. Tap **Use this cover** to apply the selected image, or press back to keep the existing cover.
+
+  The browser uses the book's stored ISBN and external IDs to target each site. If no ISBN is stored, fewer sites will return results.
+</Accordion>
+
+<Accordion title="Camera — take a photo of the cover">
+  If you want to photograph the physical cover of your copy:
+
+  1. Tap the cover image → **Take photo**.
+  2. The camera opens. Frame the cover and tap the shutter button.
+  3. The captured image is cropped and saved as the cover immediately.
+
+  This is especially useful for books with unusual covers that online databases do not have.
+</Accordion>
+
+<Accordion title="Gallery / File Picker — use an existing image">
+  To set a cover from an image already on your device:
+
+  1. Tap the cover image → **Pick from gallery** (or **Pick from file**).
+  2. The system file picker opens. Navigate to your image and tap it.
+  3. The selected image is copied into the app's private storage and set as the cover.
+</Accordion>
+
+<Accordion title="Rotate a cover">
+  If a fetched image is in the wrong orientation:
+
+  1. Tap the cover image → **Rotate**.
+  2. Choose **Rotate left** or **Rotate right**. The image is rotated 90 ° and saved.
+
+  The original file is backed up (when undo is enabled in Settings) before the rotation is applied, so you can revert if needed.
+</Accordion>
+
+## Deleting a Cover
+
+To remove a cover image entirely:
+
+- **Long-press** the cover image to reveal the delete option directly, **or**
+- Tap the cover image → overflow menu **⋮** → **Delete cover**.
+
+A confirmation prompt appears before the file is removed from disk.
+
+## Cover Storage
+
+Cover images are stored in the app's **private storage** directory on your device — they are not placed in your public gallery and will not appear in photo apps. The exact storage volume (internal storage or SD card) can be changed in **Settings → Storage**.
+
+Filenames follow the pattern `{book-uuid}.jpg` for the front cover and `{book-uuid}_1.jpg` for the back cover. The app tries `.jpg` first and falls back to `.png` when loading, since images are saved internally as PNG regardless of the extension.
+
+<Note>
+  Cover images are **included in ZIP backups** created via **Settings → Backup & Restore → Create Backup**. When you restore from a ZIP backup on a new device, all cover images are restored alongside your book database. Covers are not included in CSV exports — only the database records are.
+</Note>
+
+## Cover Settings
+
+Navigate to **Settings → Cover / Images** to adjust cover-related behaviour:
+
+| Setting | Effect |
+|---|---|
+| **Cache resized images** | Stores scaled-down display copies in a temporary database for faster list scrolling. Disable to save storage space. |
+| **Enable undo for covers** | Keeps a backup copy of the original image before any transformation (rotation, crop) so you can revert the change. |
+| **Storage volume** | Choose between internal storage and SD card for the cover directory. |
+
+<Tip>
+  If your book list feels slow when scrolling through covers, enable **Cache resized images** in the cover settings. The cache stores display-sized thumbnails so the app does not have to scale full-resolution images on every draw.
+</Tip>

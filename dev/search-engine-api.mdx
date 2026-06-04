@@ -1,0 +1,249 @@
+---
+title: "Search Engine API: Adding Custom Book Sources"
+sidebarTitle: Search Engine API
+description: Learn how the SearchEngine interface works and how to wire up a new book data source — from implementing the right sub-interface to registering it in EngineId.
+---
+
+NeverTooManyBooks fetches book metadata from a variety of online sources, each implemented as a `SearchEngine`. The system is designed so that adding a new source is straightforward: implement the right sub-interface, register the engine, and plug it into the site list. This page walks through the architecture and shows a complete skeleton implementation so you can get a new data source running with minimal friction.
+
+## The SearchEngine Interface
+
+`SearchEngine` (in `com.hardbacknutter.nevertoomanybooks.searchengines`) is the root interface every book data source must implement. It extends `Cancellable`, which means the framework can interrupt a running search at any point — every implementation must honour cancellation checks.
+
+```java
+public interface SearchEngine extends Cancellable {
+    @NonNull EngineId getEngineId();
+    @NonNull String getName(@NonNull Context context);
+    @NonNull String getHostUrl();
+    @NonNull Locale getLocale(@NonNull Context context);
+    void reset();
+    void setCaller(@Nullable Cancellable caller);
+
+    @WorkerThread
+    void ping() throws UnknownHostException, IOException,
+                       SocketTimeoutException, MalformedURLException;
+}
+```
+
+<Note>
+Every search method is annotated `@WorkerThread`. The framework always invokes searches off the main thread via `SearchCoordinator`; never call search methods directly from the UI thread.
+</Note>
+
+### Choosing a Sub-Interface
+
+The `SearchEngine` root interface alone defines no search behaviour. Each engine **must** implement at least one of the following search sub-interfaces — these are what the `SearchCoordinator` dispatches to:
+
+<CardGroup cols={2}>
+  <Card title="ByIsbn" icon="barcode">
+    Search using a validated ISBN-10 or ISBN-13 string. The most common interface — every engine that can do a simple product lookup should implement this.
+  </Card>
+  <Card title="ByText" icon="magnifying-glass">
+    Search using free-text criteria (title, author, optional code). Implement this when the site offers a keyword or catalogue search rather than a strict ISBN lookup.
+  </Card>
+  <Card title="ByExternalId" icon="id-card">
+    Search using a locally stored site-specific identifier (for example a Goodreads book ID already saved in the database). Useful for refreshing data without re-entering an ISBN.
+  </Card>
+  <Card title="CoverByEdition" icon="image">
+    Fetch a single cover image for a given `AltEdition`. Paired with `AlternativeEditions` — engines that list alternative editions can then have their covers fetched by any engine implementing this interface.
+  </Card>
+</CardGroup>
+
+There is also `ByBarcode`, which extends `ByIsbn` and adds support for non-standard barcodes. Its default implementation simply delegates to `searchByIsbn`, so you only need to override it when your site handles non-ISBN barcodes differently.
+
+### Exception Contract
+
+All search methods declare three checked exceptions:
+
+| Exception | Severity | Meaning |
+|---|---|---|
+| `CredentialsException` | **User must act now** | Authentication failed — the user must update credentials before any further searches can succeed. |
+| `StorageException` | **User must act now** | A local storage problem (disk full, missing directory, etc.) prevents completing the search. |
+| `SearchException` | Optional action | A wrapped network or parsing error. Should be reported to the user, but retrying later is a valid option. |
+
+## SearchEngineConfig
+
+`SearchEngineConfig` holds the **mutable** runtime configuration for an engine — things a user can change in Settings. It is built via `SearchEngineConfig.Builder` inside each engine's `init()` method:
+
+```java
+@Keep
+@NonNull
+public static EngineId.Builder init() {
+    return new EngineId.Builder("mybookshop", R.string.site_mybookshop,
+                                List.of(R.string.site_mybookshop_info),
+                                "https://www.mybookshop.example",
+                                Locale.ENGLISH)
+            .setConfig(builder -> builder
+                    .setConnectTimeoutMs(7_000)
+                    .setReadTimeoutMs(15_000)
+                    .build(SearchEngineConfig::new));
+}
+```
+
+Key configuration knobs exposed through `SearchEngineConfig`:
+
+| Setting | Preference Key Suffix | Default |
+|---|---|---|
+| Host URL | `host.url` | Engine's hard-coded URL |
+| Connect timeout | `timeout.connect` | 5 seconds |
+| Read timeout | `timeout.read` | 10 seconds |
+| Prefer ISBN-10 | `search.byIsbn.prefer.10` | `false` |
+| Tags to ignore | `tags.ignore` | empty set |
+| Request throttle | — | `Throttler.THROTTLER_DEFAULT_MS` |
+
+All keys are prefixed with `EngineId.getPreferenceKey()`, keeping each engine's preferences isolated.
+
+## EngineId: The Central Registry
+
+`EngineId` is an enum that serves as the **immutable** registry of every supported search engine. Each constant binds an implementation class to its configuration:
+
+```java
+public enum EngineId implements Parcelable {
+    Amazon(AmazonSearchEngine.class, true),
+    Bedetheque(BedethequeSearchEngine.class, true),
+    Bnf(BnfSearchEngine.class, true),
+    Douban(DoubanSearchEngine.class, true),
+    GoogleBooks(GoogleBooksSearchEngine.class, true),
+    Goodreads(GoodreadsSearchEngine.class, true),
+    Isfdb(IsfdbSearchEngine.class, true),
+    OpenLibrary(OpenLibrarySearchEngine.class, true),
+    StripInfoBe(StripInfoSearchEngine.class, true),
+    // ... and many more
+}
+```
+
+The boolean flag is either `true` (always enabled) or a `BuildConfig.ENABLE_*` variable, which lets in-development engines be gated out of release builds.
+
+`EngineId` also provides:
+- `createSearchEngine(Context)` — instantiates the engine via reflection using the registered constructor
+- `supports(SearchBy)` / `supports(Class<? extends SearchEngine>)` — capability queries
+- `getPreferenceKey()` — stable string key used in SharedPreferences and the database
+
+<Warning>
+**Never change an existing `EngineId`'s preference key.** This key is persisted in the database (for external IDs), in SharedPreferences, and in backup archives. Changing it silently breaks all stored data for that engine.
+</Warning>
+
+## Base Classes
+
+### SearchEngineBase
+
+`SearchEngineBase` is the abstract base all engines extend. It owns the `SearchEngineConfig` reference, manages the `AtomicBoolean cancelRequested` flag, provides a shared OkHttp client, and contains helpers for date parsing, image downloading, and money parsing. Your engine will almost always extend this rather than implementing `SearchEngine` directly.
+
+### JsoupSearchEngineBase
+
+For engines that scrape HTML pages, `JsoupSearchEngineBase` extends `SearchEngineBase` and adds a `loadDocument(Context, String url, Map<String, String> headers)` helper:
+
+```java
+public abstract class JsoupSearchEngineBase extends SearchEngineBase {
+
+    protected JsoupSearchEngineBase(@NonNull final Context appContext,
+                                    @NonNull final SearchEngineConfig config) { ... }
+
+    @WorkerThread
+    @NonNull
+    protected Document loadDocument(@NonNull final Context context,
+                                    @NonNull final String url,
+                                    @Nullable final Map<String, String> extraRequestProperties)
+            throws SearchException, CredentialsException, IOException { ... }
+}
+```
+
+`loadDocument` handles connection and read timeouts from `SearchEngineConfig`, honours the throttler, and returns a parsed Jsoup `Document`. Extend this class any time your engine works by fetching and parsing an HTML page rather than consuming a structured API.
+
+## Adding a New Search Engine
+
+<Steps>
+  <Step title="Implement the SearchEngine interface">
+    Create your engine class extending `SearchEngineBase` (or `JsoupSearchEngineBase` for HTML scraping). Implement at least one search sub-interface. Add a `@Keep`-annotated constructor that accepts `(Context, SearchEngineConfig)` and a `@Keep`-annotated static `init()` method that returns an `EngineId.Builder`:
+
+    ```java
+    public class MyBookShopSearchEngine extends SearchEngineBase
+            implements SearchEngine.ByIsbn {
+
+        @Keep
+        public MyBookShopSearchEngine(@NonNull final Context appContext,
+                                      @NonNull final SearchEngineConfig config) {
+            super(appContext, config);
+        }
+
+        @Keep
+        @NonNull
+        public static EngineId.Builder init() {
+            return new EngineId.Builder(
+                    "mybookshop",
+                    R.string.site_mybookshop,
+                    List.of(R.string.site_mybookshop_info),
+                    "https://www.mybookshop.example",
+                    Locale.ENGLISH);
+        }
+
+        @NonNull
+        @WorkerThread
+        @Override
+        public Book searchByIsbn(@NonNull final Context context,
+                                 @NonNull final String validIsbn,
+                                 @NonNull final boolean[] fetchCovers)
+                throws StorageException, SearchException, CredentialsException {
+            final Book book = new Book();
+            // TODO: fetch data, parse response, populate book fields
+            return book;
+        }
+    }
+    ```
+
+    <Note>
+    The `fetchCovers` parameter is a boolean array of length `DBKey.NR_OF_BOOK_COVERS` (currently 2). Index 0 is the front cover, index 1 is the back cover. Only download cover images for indexes where `fetchCovers[i]` is `true`.
+    </Note>
+  </Step>
+
+  <Step title="Register in EngineId">
+    Add your engine to the `EngineId` enum. Follow the `// NEWTHINGS: adding a new search engine: add an engine class` comment in the source:
+
+    ```java
+    MyBookShop(MyBookShopSearchEngine.class, true),
+    ```
+
+    The enum constructor will reflectively call `MyBookShopSearchEngine.init()` to retrieve the builder. An `IllegalStateException` is thrown at startup if the `init()` method is missing or incorrectly named.
+  </Step>
+
+  <Step title="Add a string resource">
+    Add a non-translatable string resource for the site name in `src/main/res/values/strings-donottranslate.xml`. Follow the existing `site_*` naming pattern:
+
+    ```xml
+    <string name="site_mybookshop" translatable="false">My Book Shop</string>
+    <string name="site_mybookshop_info" translatable="false">mybookshop.example</string>
+    ```
+  </Step>
+
+  <Step title="Add to the Site list">
+    Inside `EngineId.registerSites()`, add your engine to the appropriate `Site.Type` list(s). At minimum, add it to `Site.Type.Data` so it participates in book metadata searches. You can conditionally enable it based on the device locale:
+
+    ```java
+    // In the Site.Type.Data block:
+    type.addSite(MyBookShop, true);
+    ```
+
+    Engines added to `Site.Type.Covers` must implement `CoverByEdition`. Engines added to `Site.Type.AltEditions` must implement `AlternativeEditions`.
+  </Step>
+</Steps>
+
+## Optional Interfaces
+
+<Accordion title="SearchEngine.Login">
+Implement this if your site requires users to log in before searching. The `SearchCoordinator` calls `login(Context)` before dispatching any search method. You must also implement `isLoginToSearch(Context)` to indicate when login is required.
+</Accordion>
+
+<Accordion title="SearchEngine.UserRegistration">
+Implement this if the site has optional or required user registration (API keys, OAuth tokens). Provides `isRegistrationRequired()`, `hasRegistrationData(Context)`, `getRegistrationInfo(Context)`, and `getPreferenceFragmentClass()` — the last returning the Fragment the app will open so the user can enter credentials.
+</Accordion>
+
+<Accordion title="SearchEngine.SearchOnSite">
+Implement this to add a "Search on website" menu option in the book detail view. `createSearchOnSiteUrl(Context, Author, Series)` should return a URL the app will open in the browser — at least one of Author or Series will be non-null.
+</Accordion>
+
+<Accordion title="SearchEngine.AlternativeEditions">
+Implement `searchAlternativeEditions(Context, String validIsbn)` to return a list of `AltEdition` objects for a given ISBN. These are passed to any engine implementing `CoverByEdition` to fetch alternative covers.
+</Accordion>
+
+<Warning>
+Always check the target site's `robots.txt` and terms of service before writing a scraping-based engine. Many sites prohibit automated access. The `SearchEngineConfig` throttler is there to help limit request rates — use it, and prefer official APIs over HTML scraping wherever they are available.
+</Warning>
